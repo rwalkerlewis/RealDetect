@@ -73,15 +73,15 @@ CMakeFiles/seisproc.dir/src/main.cpp.o: CMakeFiles/seisproc.dir/flags.make
 CMakeFiles/seisproc.dir/src/main.cpp.o: /workspace/src/main.cpp
 CMakeFiles/seisproc.dir/src/main.cpp.o: CMakeFiles/seisproc.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/seisproc.dir/src/main.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc.dir/src/main.cpp.o -MF CMakeFiles/seisproc.dir/src/main.cpp.o.d -o CMakeFiles/seisproc.dir/src/main.cpp.o -c /workspace/src/main.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc.dir/src/main.cpp.o -MF CMakeFiles/seisproc.dir/src/main.cpp.o.d -o CMakeFiles/seisproc.dir/src/main.cpp.o -c /workspace/src/main.cpp
 
 CMakeFiles/seisproc.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc.dir/src/main.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/main.cpp > CMakeFiles/seisproc.dir/src/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/main.cpp > CMakeFiles/seisproc.dir/src/main.cpp.i
 
 CMakeFiles/seisproc.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc.dir/src/main.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/main.cpp -o CMakeFiles/seisproc.dir/src/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/main.cpp -o CMakeFiles/seisproc.dir/src/main.cpp.s
 
 # Object files for target seisproc
 seisproc_OBJECTS = \
@@ -93,8 +93,7 @@ seisproc_EXTERNAL_OBJECTS =
 seisproc: CMakeFiles/seisproc.dir/src/main.cpp.o
 seisproc: CMakeFiles/seisproc.dir/build.make
 seisproc: libseisproc_core.a
-seisproc: /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so
-seisproc: /usr/lib/x86_64-linux-gnu/libpthread.a
+seisproc: /usr/lib/x86_64-linux-gnu/libsqlite3.so
 seisproc: CMakeFiles/seisproc.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable seisproc"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/seisproc.dir/link.txt --verbose=$(VERBOSE)

@@ -1,1 +1,1 @@
-/usr/bin/g++  -fopenmp -Wall -Wextra -O3 CMakeFiles/seissim.dir/src/simulator.cpp.o -o seissim  libseisproc_core.a -ldl /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a 
+/usr/bin/c++  -Wall -Wextra -O3 CMakeFiles/seissim.dir/src/simulator.cpp.o -o seissim  libseisproc_core.a /usr/lib/x86_64-linux-gnu/libsqlite3.so -ldl 

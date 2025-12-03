@@ -1,0 +1,22 @@
+# Mediterranean Regional Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Average model for the Mediterranean region
+# Variable crustal thickness (thin oceanic to thick orogenic)
+#
+# Reference: European reference model
+
+# Sediments
+0.0     5.0     4.50    2.60    2.40
+
+# Upper crust
+5.0     15.0    6.00    3.46    2.70
+
+# Middle crust
+20.0    10.0    6.50    3.75    2.85
+
+# Lower crust
+30.0    5.0     7.00    4.04    3.00
+
+# Upper mantle
+35.0    0.0     8.00    4.62    3.35

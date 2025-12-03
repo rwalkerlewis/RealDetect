@@ -12,6 +12,22 @@ option(USE_OPENMP "Enable OpenMP parallelization" ON)
 # Find required packages
 find_package(Threads REQUIRED)
 find_package(Eigen3 3.3 QUIET)
+find_package(SQLite3 QUIET)
+
+if(NOT SQLite3_FOUND)
+    # Try pkg-config as fallback
+    find_package(PkgConfig)
+    if(PKG_CONFIG_FOUND)
+        pkg_check_modules(SQLITE3 sqlite3)
+    endif()
+    
+    if(NOT SQLITE3_FOUND)
+        message(STATUS "SQLite3 not found, will try to use system library directly")
+        set(SQLITE3_LIBRARIES sqlite3)
+    endif()
+else()
+    message(STATUS "Found SQLite3: ${SQLite3_LIBRARIES}")
+endif()
 
 if(NOT EIGEN3_FOUND)
     # If Eigen not found, use bundled header-only version
@@ -45,7 +61,12 @@ set(CORE_SOURCES
     src/core/event.cpp
     src/core/waveform.cpp
     src/core/velocity_model.cpp
+    src/core/regional_velocity_model.cpp
     src/core/config.cpp
+)
+
+set(DATABASE_SOURCES
+    src/database/css30_database.cpp
 )
 
 set(SEEDLINK_SOURCES
@@ -83,12 +104,24 @@ set(MAGNITUDE_SOURCES
 # Core library
 add_library(seisproc_core STATIC
     ${CORE_SOURCES}
+    ${DATABASE_SOURCES}
     ${SEEDLINK_SOURCES}
     ${PICKER_SOURCES}
     ${ASSOCIATOR_SOURCES}
     ${LOCATOR_SOURCES}
     ${MAGNITUDE_SOURCES}
 )
+
+# Link SQLite3
+if(SQLite3_FOUND)
+    target_link_libraries(seisproc_core ${SQLite3_LIBRARIES})
+    target_include_directories(seisproc_core PRIVATE ${SQLite3_INCLUDE_DIRS})
+elseif(SQLITE3_FOUND)
+    target_link_libraries(seisproc_core ${SQLITE3_LIBRARIES})
+    target_include_directories(seisproc_core PRIVATE ${SQLITE3_INCLUDE_DIRS})
+else()
+    target_link_libraries(seisproc_core sqlite3)
+endif()
 
 target_link_libraries(seisproc_core
     Threads::Threads

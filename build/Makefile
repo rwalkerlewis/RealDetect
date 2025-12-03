@@ -393,6 +393,30 @@ src/core/miniseed.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/core/miniseed.cpp.s
 .PHONY : src/core/miniseed.cpp.s
 
+src/core/regional_velocity_model.o: src/core/regional_velocity_model.cpp.o
+.PHONY : src/core/regional_velocity_model.o
+
+# target to build an object file
+src/core/regional_velocity_model.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/core/regional_velocity_model.cpp.o
+.PHONY : src/core/regional_velocity_model.cpp.o
+
+src/core/regional_velocity_model.i: src/core/regional_velocity_model.cpp.i
+.PHONY : src/core/regional_velocity_model.i
+
+# target to preprocess a source file
+src/core/regional_velocity_model.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/core/regional_velocity_model.cpp.i
+.PHONY : src/core/regional_velocity_model.cpp.i
+
+src/core/regional_velocity_model.s: src/core/regional_velocity_model.cpp.s
+.PHONY : src/core/regional_velocity_model.s
+
+# target to generate assembly for a file
+src/core/regional_velocity_model.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/core/regional_velocity_model.cpp.s
+.PHONY : src/core/regional_velocity_model.cpp.s
+
 src/core/station.o: src/core/station.cpp.o
 .PHONY : src/core/station.o
 
@@ -464,6 +488,30 @@ src/core/waveform.s: src/core/waveform.cpp.s
 src/core/waveform.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/core/waveform.cpp.s
 .PHONY : src/core/waveform.cpp.s
+
+src/database/css30_database.o: src/database/css30_database.cpp.o
+.PHONY : src/database/css30_database.o
+
+# target to build an object file
+src/database/css30_database.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/database/css30_database.cpp.o
+.PHONY : src/database/css30_database.cpp.o
+
+src/database/css30_database.i: src/database/css30_database.cpp.i
+.PHONY : src/database/css30_database.i
+
+# target to preprocess a source file
+src/database/css30_database.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/database/css30_database.cpp.i
+.PHONY : src/database/css30_database.cpp.i
+
+src/database/css30_database.s: src/database/css30_database.cpp.s
+.PHONY : src/database/css30_database.s
+
+# target to generate assembly for a file
+src/database/css30_database.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_core.dir/build.make CMakeFiles/seisproc_core.dir/src/database/css30_database.cpp.s
+.PHONY : src/database/css30_database.cpp.s
 
 src/locator/geiger.o: src/locator/geiger.cpp.o
 .PHONY : src/locator/geiger.o
@@ -1030,6 +1078,9 @@ help:
 	@echo "... src/core/miniseed.o"
 	@echo "... src/core/miniseed.i"
 	@echo "... src/core/miniseed.s"
+	@echo "... src/core/regional_velocity_model.o"
+	@echo "... src/core/regional_velocity_model.i"
+	@echo "... src/core/regional_velocity_model.s"
 	@echo "... src/core/station.o"
 	@echo "... src/core/station.i"
 	@echo "... src/core/station.s"
@@ -1039,6 +1090,9 @@ help:
 	@echo "... src/core/waveform.o"
 	@echo "... src/core/waveform.i"
 	@echo "... src/core/waveform.s"
+	@echo "... src/database/css30_database.o"
+	@echo "... src/database/css30_database.i"
+	@echo "... src/database/css30_database.s"
 	@echo "... src/locator/geiger.o"
 	@echo "... src/locator/geiger.i"
 	@echo "... src/locator/geiger.s"

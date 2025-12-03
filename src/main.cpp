@@ -21,6 +21,8 @@
 #include "seisproc/core/config.hpp"
 #include "seisproc/core/station.hpp"
 #include "seisproc/core/velocity_model.hpp"
+#include "seisproc/core/regional_velocity_model.hpp"
+#include "seisproc/database/css30_database.hpp"
 #include "seisproc/seedlink/seedlink_client.hpp"
 #include "seisproc/picker/stalta_picker.hpp"
 #include "seisproc/picker/aic_picker.hpp"
@@ -48,10 +50,20 @@ void printUsage(const char* progname) {
     std::cout << "  -p, --port <port>      SeedLink server port (default: 18000)\n";
     std::cout << "  -S, --stations <file>  Station inventory file\n";
     std::cout << "  -v, --velocity <file>  Velocity model file\n";
+    std::cout << "  -V, --velocity-dir <dir> Directory with regional velocity models\n";
+    std::cout << "  -d, --database <file>  CSS3.0 database file for output\n";
     std::cout << "  -h, --help             Show this help message\n";
     std::cout << "\n";
+    std::cout << "Database Output:\n";
+    std::cout << "  Events are stored in CSS3.0 schema format (SQLite database)\n";
+    std::cout << "  Tables: event, origin, origerr, arrival, assoc, netmag, stamag\n";
+    std::cout << "\n";
+    std::cout << "Regional Velocity Models:\n";
+    std::cout << "  Place .vel files with .bounds files in velocity model directory\n";
+    std::cout << "  Or create velocity_models.conf for detailed configuration\n";
+    std::cout << "\n";
     std::cout << "Example:\n";
-    std::cout << "  " << progname << " -s rtserve.iris.washington.edu -p 18000\n";
+    std::cout << "  " << progname << " -s rtserve.iris.washington.edu -p 18000 -d catalog.db\n";
 }
 
 /**
@@ -60,13 +72,16 @@ void printUsage(const char* progname) {
 class SeisProc {
 public:
     SeisProc() 
-        : picker_(std::make_shared<STALTAPicker>())
+        : db_enabled_(false)
+        , use_regional_models_(false)
+        , picker_(std::make_shared<STALTAPicker>())
         , locator_(std::make_shared<GeigerLocator>())
         , ml_calculator_(std::make_shared<LocalMagnitude>())
         , mw_calculator_(std::make_shared<MomentMagnitude>())
     {
         // Initialize with default velocity model
         velocity_model_ = VelocityModel1D::simpleThreeLayer();
+        velocity_manager_.setDefaultModel(velocity_model_);
         
         // Configure picker
         picker_->setParameter("sta_length", 0.5);
@@ -89,7 +104,7 @@ public:
             return false;
         }
         
-        // Apply configuration
+        // Apply picker configuration
         if (config_.has("picker.sta_length")) {
             picker_->setParameter("sta_length", config_.getDouble("picker.sta_length"));
         }
@@ -111,6 +126,74 @@ public:
             associator_.setMinPhases(config_.getInt("associator.min_phases"));
         }
         
+        // Load velocity model configuration
+        if (config_.has("velocity_model.model")) {
+            std::string model_name = config_.getString("velocity_model.model");
+            if (model_name == "iasp91") {
+                velocity_model_ = VelocityModel1D::iasp91();
+            } else if (model_name == "ak135") {
+                velocity_model_ = VelocityModel1D::ak135();
+            } else if (model_name == "simple3layer") {
+                velocity_model_ = VelocityModel1D::simpleThreeLayer();
+            }
+            velocity_manager_.setDefaultModel(velocity_model_);
+            locator_->setVelocityModel(velocity_model_);
+            associator_.setVelocityModel(velocity_model_);
+        }
+        
+        // Regional velocity models
+        if (config_.getBool("velocity_model.regional_models_enabled", false)) {
+            use_regional_models_ = true;
+            std::string models_dir = config_.getString("velocity_model.regional_models_dir", 
+                                                        "config/velocity_models");
+            if (!velocity_manager_.loadFromDirectory(models_dir)) {
+                std::cerr << "Warning: Failed to load regional velocity models from " 
+                          << models_dir << std::endl;
+            } else {
+                std::cout << "Loaded " << velocity_manager_.modelCount() 
+                          << " regional velocity models" << std::endl;
+            }
+        }
+        
+        // Database configuration
+        if (config_.getBool("database.enabled", false)) {
+            std::string db_file = config_.getString("database.file", "seisproc_catalog.db");
+            if (initDatabase(db_file)) {
+                db_author_ = config_.getString("database.author", "seisproc");
+                db_network_ = config_.getString("database.network", "XX");
+                database_.setAuthor(db_author_);
+            }
+        }
+        
+        return true;
+    }
+    
+    bool initDatabase(const std::string& filename) {
+        if (!database_.open(filename)) {
+            std::cerr << "Failed to open database: " << filename << std::endl;
+            return false;
+        }
+        
+        if (config_.getBool("database.auto_create_schema", true)) {
+            if (!database_.createSchema()) {
+                std::cerr << "Failed to create database schema" << std::endl;
+                return false;
+            }
+        }
+        
+        db_enabled_ = true;
+        std::cout << "CSS3.0 database opened: " << filename << std::endl;
+        return true;
+    }
+    
+    bool openDatabase(const std::string& filename) {
+        if (!database_.open(filename)) {
+            std::cerr << "Failed to open database: " << filename << std::endl;
+            return false;
+        }
+        database_.createSchema();
+        db_enabled_ = true;
+        std::cout << "CSS3.0 database opened: " << filename << std::endl;
         return true;
     }
     
@@ -130,8 +213,20 @@ public:
             return false;
         }
         
+        velocity_manager_.setDefaultModel(velocity_model_);
         locator_->setVelocityModel(velocity_model_);
         associator_.setVelocityModel(velocity_model_);
+        return true;
+    }
+    
+    bool loadRegionalModels(const std::string& directory) {
+        if (!velocity_manager_.loadFromDirectory(directory)) {
+            std::cerr << "Failed to load regional velocity models from: " << directory << std::endl;
+            return false;
+        }
+        use_regional_models_ = true;
+        std::cout << "Loaded " << velocity_manager_.modelCount() 
+                  << " regional velocity models" << std::endl;
         return true;
     }
     
@@ -192,8 +287,16 @@ private:
     Config config_;
     StationInventory stations_;
     VelocityModel1D velocity_model_;
+    VelocityModelManager velocity_manager_;
     SeedLinkClient client_;
     MultiStreamBuffer buffer_;
+    
+    // CSS3.0 Database
+    CSS30Database database_;
+    bool db_enabled_;
+    std::string db_author_;
+    std::string db_network_;
+    bool use_regional_models_;
     
     std::shared_ptr<STALTAPicker> picker_;
     PhaseAssociator associator_;
@@ -251,10 +354,36 @@ private:
             event_picks.push_back(arr.pick);
         }
         
+        // Select velocity model based on initial location estimate (if using regional models)
+        std::string velocity_model_name = "default";
+        if (use_regional_models_) {
+            // Use initial event location to select velocity model
+            const auto& initial_loc = event->preferredOrigin().location;
+            velocity_model_name = velocity_manager_.getModelNameForLocation(initial_loc);
+            const auto& regional_model = velocity_manager_.getModelForLocation(initial_loc);
+            locator_->setVelocityModel(regional_model);
+            std::cout << "Using velocity model: " << velocity_model_name << std::endl;
+        }
+        
         // Locate event
         auto location_result = locator_->locate(event_picks, stations_);
         
         if (location_result.converged) {
+            // If using regional models, check if the final location needs a different model
+            if (use_regional_models_) {
+                std::string final_model = velocity_manager_.getModelNameForLocation(
+                    location_result.origin.location);
+                if (final_model != velocity_model_name) {
+                    // Re-locate with the correct model
+                    std::cout << "Relocating with velocity model: " << final_model << std::endl;
+                    velocity_model_name = final_model;
+                    const auto& regional_model = velocity_manager_.getModelForLocation(
+                        location_result.origin.location);
+                    locator_->setVelocityModel(regional_model);
+                    location_result = locator_->locate(event_picks, stations_);
+                }
+            }
+            
             event->origins().back() = location_result.origin;
             
             std::cout << "Location: " << location_result.origin.location.latitude << "° N, "
@@ -308,6 +437,15 @@ private:
                     }
                 }
             }
+            
+            // Store event in CSS3.0 database
+            if (db_enabled_) {
+                if (database_.storeCompleteEvent(*event, velocity_model_name, db_network_)) {
+                    std::cout << "Event stored in database (evid: " << event->id() << ")" << std::endl;
+                } else {
+                    std::cerr << "Failed to store event in database" << std::endl;
+                }
+            }
         } else {
             std::cout << "Location failed to converge" << std::endl;
         }
@@ -328,6 +466,8 @@ int main(int argc, char* argv[]) {
     int server_port = 18000;
     std::string stations_file;
     std::string velocity_file;
+    std::string velocity_dir;
+    std::string database_file;
     
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -345,11 +485,16 @@ int main(int argc, char* argv[]) {
             stations_file = argv[++i];
         } else if ((arg == "-v" || arg == "--velocity") && i + 1 < argc) {
             velocity_file = argv[++i];
+        } else if ((arg == "-V" || arg == "--velocity-dir") && i + 1 < argc) {
+            velocity_dir = argv[++i];
+        } else if ((arg == "-d" || arg == "--database") && i + 1 < argc) {
+            database_file = argv[++i];
         }
     }
     
     std::cout << "=======================================\n";
     std::cout << "SeisProc - Real-time Seismic Processing\n";
+    std::cout << "  with CSS3.0 Database Support\n";
     std::cout << "=======================================\n\n";
     
     SeisProc app;
@@ -365,6 +510,16 @@ int main(int argc, char* argv[]) {
     // Load velocity model if provided
     if (!velocity_file.empty()) {
         app.loadVelocityModel(velocity_file);
+    }
+    
+    // Load regional velocity models if directory provided
+    if (!velocity_dir.empty()) {
+        app.loadRegionalModels(velocity_dir);
+    }
+    
+    // Open database if provided via command line (overrides config)
+    if (!database_file.empty()) {
+        app.openDatabase(database_file);
     }
     
     // Connect to server

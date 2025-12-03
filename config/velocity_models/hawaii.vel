@@ -1,0 +1,24 @@
+# Hawaii Volcanic Region Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Model for Hawaiian volcanic islands
+# Thin oceanic crust with volcanic pile on top
+# Important for accurate location of volcanic seismicity
+#
+# Oceanic crust + volcanic edifice
+# Reference: Various HVO velocity studies
+
+# Volcanic edifice (high porosity)
+0.0     2.0     3.00    1.73    2.20
+
+# Basaltic volcanic rocks
+2.0     3.0     5.00    2.89    2.60
+
+# Oceanic crust layer 2 (basalt)
+5.0     2.0     6.20    3.58    2.80
+
+# Oceanic crust layer 3 (gabbro)
+7.0     5.0     6.80    3.93    2.95
+
+# Oceanic mantle
+12.0    0.0     8.10    4.68    3.35

@@ -40,12 +40,27 @@ A comprehensive C++ seismic processing system inspired by [SeisComP](https://www
 - **Ms (Surface Wave Magnitude)**: 20-second Rayleigh wave
 - **Md (Duration Magnitude)**: Coda duration method
 
+### Database Output (CSS3.0)
+- **SQLite Database**: Event catalog storage in CSS3.0 standard schema
+- **Complete Event Storage**: Events, origins, arrivals, associations, magnitudes
+- **Station Metadata**: Site, sitechan, affiliation tables
+- **Query Support**: Time, location, magnitude filtering
+- **Flat File Export**: Export to CSS3.0 flat files for interoperability
+
+### Regional Velocity Models
+- **Geographic Regions**: Define 1D models for specific geographic areas
+- **Region Types**: Bounding box, circle, or polygon boundaries
+- **Priority System**: Automatic selection based on event location
+- **Multiple Formats**: Support for HYPO71, VELEST, NonLinLoc formats
+- **Fallback**: Global default model when no regional model matches
+
 ## Building
 
 ### Requirements
 - C++17 compatible compiler (GCC 7+, Clang 5+)
 - CMake 3.16+
 - Eigen3 (for linear algebra in Geiger inversion)
+- SQLite3 (for CSS3.0 database output)
 - pthreads
 
 ### Optional
@@ -80,6 +95,12 @@ sudo make install
 
 # Connect to local server
 ./seisproc -s localhost -p 18000
+
+# With CSS3.0 database output
+./seisproc -s localhost -p 18000 -d catalog.db
+
+# With regional velocity models
+./seisproc -s localhost -p 18000 -V config/velocity_models -d catalog.db
 ```
 
 ### Simulator (for testing)
@@ -103,6 +124,8 @@ Options:
   -p, --port <port>      SeedLink server port (default: 18000)
   -S, --stations <file>  Station inventory file
   -v, --velocity <file>  Velocity model file
+  -V, --velocity-dir <dir> Directory with regional velocity models
+  -d, --database <file>  CSS3.0 database file for output
   -h, --help             Show this help message
 ```
 
@@ -120,6 +143,18 @@ trigger_ratio = 3.5       # STA/LTA trigger threshold
 algorithm = geiger        # Location algorithm (geiger, gridsearch, octtree)
 fixed_depth = false       # Fix depth to default value
 default_depth = 10.0      # Default/fixed depth (km)
+
+[velocity_model]
+model = simple3layer      # Built-in model (iasp91, ak135, simple3layer)
+regional_models_enabled = true
+regional_models_dir = config/velocity_models
+
+[database]
+enabled = true            # Enable CSS3.0 database output
+file = seisproc_catalog.db
+author = seisproc
+network = XX
+auto_create_schema = true
 
 [magnitude]
 ml_enabled = true         # Calculate local magnitude
@@ -144,6 +179,49 @@ IU ANMO   34.9462 -106.4567 1850
 32.0   0.0     7.80    4.50    3.30
 ```
 
+### Regional Velocity Model Configuration
+Place in `config/velocity_models/velocity_models.conf`:
+```ini
+[default]
+model_file = iasp91.vel
+bounds_type = default
+description = IASP91 global reference model
+
+[socal]
+model_file = socal.vel
+bounds_type = box
+bounds = 32.0,36.0,-121.0,-114.0
+priority = 10
+description = Southern California velocity model
+
+[hawaii]
+model_file = hawaii.vel
+bounds_type = circle
+bounds = 19.5,-155.5,200.0
+priority = 20
+description = Hawaii volcanic region model
+
+[cascadia]
+model_file = cascadia.vel
+bounds_type = polygon
+bounds = 42.0,-125.0;42.0,-120.0;49.0,-120.0;49.0,-125.0
+priority = 10
+description = Cascadia subduction zone model
+```
+
+### CSS3.0 Database Schema
+The database follows the CSS3.0 standard with the following core tables:
+- **event**: Earthquake event identification
+- **origin**: Hypocenter solutions (lat, lon, depth, time)
+- **origerr**: Origin error ellipse and uncertainties
+- **arrival**: Phase arrival picks
+- **assoc**: Arrival-origin associations with residuals
+- **netmag**: Network magnitudes
+- **stamag**: Station magnitudes
+- **site**: Station locations
+- **sitechan**: Channel information
+- **affiliation**: Network-station affiliations
+
 ## Architecture
 
 ```
@@ -155,7 +233,12 @@ seisproc/
 │   │   ├── station.hpp     # Station/channel metadata
 │   │   ├── event.hpp       # Event/Origin/Pick structures
 │   │   ├── velocity_model.hpp
+│   │   ├── regional_velocity_model.hpp  # Regional model manager
 │   │   └── config.hpp
+│   │
+│   ├── database/       # CSS3.0 database support
+│   │   ├── css30_schema.hpp   # CSS3.0 table definitions
+│   │   └── css30_database.hpp # SQLite implementation
 │   │
 │   ├── seedlink/       # SeedLink data acquisition
 │   │   └── seedlink_client.hpp
@@ -180,6 +263,15 @@ seisproc/
 │       ├── local_magnitude.hpp
 │       └── moment_magnitude.hpp
 │
+├── config/
+│   ├── seisproc.conf           # Main configuration
+│   ├── velocity_model.txt      # Default velocity model
+│   └── velocity_models/        # Regional velocity models
+│       ├── velocity_models.conf
+│       ├── iasp91.vel
+│       ├── socal.vel
+│       └── ...
+│
 └── src/                # Implementations
 ```
 
@@ -187,11 +279,15 @@ seisproc/
 
 ```
 Data Flow:
-                                                    
-  SeedLink    →   Buffer   →   Picker   →   Associator   →   Locator   →   Magnitude
-     │              │           │               │               │              │
-  Real-time    Circular      STA/LTA        Travel-time      Geiger          ML
+                                                                              ┌──────────┐
+  SeedLink    →   Buffer   →   Picker   →   Associator   →   Locator   →   Magnitude   →   │  CSS3.0  │
+     │              │           │               │               │              │            │ Database │
+  Real-time    Circular      STA/LTA        Travel-time      Geiger          ML            └──────────┘
   MiniSEED     buffer        + AIC          clustering      inversion        Mw
+                                                 │
+                                            Regional
+                                         Velocity Model
+                                           Selection
 ```
 
 ## Algorithms
