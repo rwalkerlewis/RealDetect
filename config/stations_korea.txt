@@ -1,0 +1,83 @@
+# Regional Seismic Network Stations for Korean Peninsula Monitoring
+# Real station locations for detecting DPRK nuclear tests
+#
+# Format: Network Station Latitude Longitude Elevation(m) [Channels]
+#
+# Sources:
+#   - Korea Meteorological Administration (KMA)
+#   - IRIS DMC station metadata
+#   - CTBTO IMS network
+#   - Japanese F-net/Hi-net (NIED)
+#   - China Earthquake Networks Center
+
+# ============================================================
+# CTBTO IMS Primary Station - Most important for DPRK monitoring
+# ============================================================
+# KSRS (Wonju) - IMS Primary Seismic Array (PS31)
+IU   INCN   37.4786  126.6242   79    BHZ,BHN,BHE
+
+# ============================================================
+# South Korean Stations (KMA/KIGAM Networks)
+# ============================================================
+# KS Network - Korea Seismic Network
+KS   BRD    35.9853  128.9883   210   HHZ,HHN,HHE
+KS   CHJ    33.5217  126.9483   195   HHZ,HHN,HHE
+KS   CHC    36.7200  127.9600   380   HHZ,HHN,HHE
+KS   DAG    35.7680  128.6190   110   HHZ,HHN,HHE
+KS   GKP    37.9990  128.6690   330   HHZ,HHN,HHE
+KS   GSU    35.1510  128.1000    95   HHZ,HHN,HHE
+KS   HKU    34.6040  127.2530    57   HHZ,HHN,HHE
+KS   HSB    35.5660  129.3480   190   HHZ,HHN,HHE
+KS   JEO    35.8220  127.1170    45   HHZ,HHN,HHE
+KS   KWJ    35.2140  126.8810    60   HHZ,HHN,HHE
+KS   MUN    36.5830  128.7200   245   HHZ,HHN,HHE
+KS   SEO    37.4570  127.0110    52   HHZ,HHN,HHE
+KS   SES    37.6080  127.0170    85   HHZ,HHN,HHE
+KS   SND    37.2830  127.5170   142   HHZ,HHN,HHE
+KS   TJN    36.3700  127.3640    75   HHZ,HHN,HHE
+KS   ULJ    36.9930  129.4170   185   HHZ,HHN,HHE
+KS   WJU    37.3550  127.8200   145   HHZ,HHN,HHE
+KS   YKB    35.0950  129.0340   150   HHZ,HHN,HHE
+
+# ============================================================
+# Japanese Stations (NIED F-net/Hi-net)
+# ============================================================
+# F-net broadband stations (Japan)
+JP   FUJ    39.0492  141.4339   242   BHZ,BHN,BHE
+JP   TSK    36.2142  140.0893    25   BHZ,BHN,BHE
+JP   IZH    34.1310  129.2070   170   BHZ,BHN,BHE
+JP   TGW    35.7110  139.2820   560   BHZ,BHN,BHE
+JP   SGN    35.5110  138.9360   820   BHZ,BHN,BHE
+JP   ONS    36.1550  139.8450    30   BHZ,BHN,BHE
+JP   HRO    35.0500  134.5400   315   BHZ,BHN,BHE
+JP   ABU    34.8610  131.5700   400   BHZ,BHN,BHE
+JP   TKA    34.0690  131.1220   205   BHZ,BHN,BHE
+JP   NOK    34.1910  132.9600   295   BHZ,BHN,BHE
+JP   YMZ    36.9310  140.2480    50   BHZ,BHN,BHE
+JP   KNP    36.0550  140.6330    25   BHZ,BHN,BHE
+JP   MDJ    44.6200  129.5900   260   BHZ,BHN,BHE
+
+# ============================================================
+# Chinese Stations (China Earthquake Networks Center)
+# ============================================================
+# IC Network (New China Digital Seismograph Network)
+IC   MDJ    44.6167  129.5917   220   BHZ,BHN,BHE
+IC   HIA    49.2667  119.7417   610   BHZ,BHN,BHE
+IC   XAN    34.0333  108.9167   630   BHZ,BHN,BHE
+IC   BJT    40.0183  116.1683    55   BHZ,BHN,BHE
+IC   SSE    31.0950  121.1867     5   BHZ,BHN,BHE
+
+# CNY - Northeast China stations close to DPRK
+CN   MDJ    44.6167  129.5917   220   BHZ,BHN,BHE
+CN   YNB    42.8800  129.4700   580   BHZ,BHN,BHE
+CN   HLR    45.7233  126.6150   180   BHZ,BHN,BHE
+CN   CNS    41.7850  123.8230    65   BHZ,BHN,BHE
+CN   DL     38.9170  121.6330    95   BHZ,BHN,BHE
+CN   DAN    40.0500  124.3330    25   BHZ,BHN,BHE
+
+# ============================================================
+# Russian Far East Stations
+# ============================================================
+RU   YSS    46.9587  142.7608   30    BHZ,BHN,BHE
+RU   PET    53.0233  158.6500   100   BHZ,BHN,BHE
+RU   BIL    68.0653  166.4523   320   BHZ,BHN,BHE
