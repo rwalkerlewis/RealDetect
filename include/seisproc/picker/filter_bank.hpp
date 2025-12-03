@@ -73,7 +73,7 @@ public:
     SampleVector combinedEnvelope(const SampleVector& data) const;
     
     // Band info
-    size_t bandCount() const { return filters_.size(); }
+    size_t bandCount() const { return bands_.size(); }
     std::pair<double, double> bandFrequencies(size_t idx) const {
         if (idx < bands_.size()) return bands_[idx];
         return {0, 0};

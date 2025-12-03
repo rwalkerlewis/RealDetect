@@ -119,6 +119,11 @@ public:
         values_[key] = value;
     }
     
+    // Explicit overload for char* to avoid bool conversion
+    void set(const std::string& key, const char* value) {
+        values_[key] = value;
+    }
+    
     void set(const std::string& key, int value) {
         values_[key] = std::to_string(value);
     }

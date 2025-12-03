@@ -65,6 +65,16 @@ CMAKE_BINARY_DIR = /workspace/build
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "No interactive CMake dialog available..."
@@ -199,6 +209,45 @@ seissim: cmake_check_build_system
 seissim/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/seissim.dir/build.make CMakeFiles/seissim.dir/build
 .PHONY : seissim/fast
+
+#=============================================================================
+# Target rules for targets named seisproc_tests
+
+# Build rule for target.
+seisproc_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 seisproc_tests
+.PHONY : seisproc_tests
+
+# fast build rule for target.
+seisproc_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/build
+.PHONY : seisproc_tests/fast
+
+#=============================================================================
+# Target rules for targets named run_tests
+
+# Build rule for target.
+run_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_tests
+.PHONY : run_tests
+
+# fast build rule for target.
+run_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_tests.dir/build.make CMakeFiles/run_tests.dir/build
+.PHONY : run_tests/fast
+
+#=============================================================================
+# Target rules for targets named run_benchmark
+
+# Build rule for target.
+run_benchmark: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_benchmark
+.PHONY : run_benchmark
+
+# fast build rule for target.
+run_benchmark/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/run_benchmark.dir/build.make CMakeFiles/run_benchmark.dir/build
+.PHONY : run_benchmark/fast
 
 src/associator/event_builder.o: src/associator/event_builder.cpp.o
 .PHONY : src/associator/event_builder.o
@@ -800,6 +849,150 @@ src/simulator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/seissim.dir/build.make CMakeFiles/seissim.dir/src/simulator.cpp.s
 .PHONY : src/simulator.cpp.s
 
+tests/test_benchmark.o: tests/test_benchmark.cpp.o
+.PHONY : tests/test_benchmark.o
+
+# target to build an object file
+tests/test_benchmark.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o
+.PHONY : tests/test_benchmark.cpp.o
+
+tests/test_benchmark.i: tests/test_benchmark.cpp.i
+.PHONY : tests/test_benchmark.i
+
+# target to preprocess a source file
+tests/test_benchmark.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.i
+.PHONY : tests/test_benchmark.cpp.i
+
+tests/test_benchmark.s: tests/test_benchmark.cpp.s
+.PHONY : tests/test_benchmark.s
+
+# target to generate assembly for a file
+tests/test_benchmark.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.s
+.PHONY : tests/test_benchmark.cpp.s
+
+tests/test_core.o: tests/test_core.cpp.o
+.PHONY : tests/test_core.o
+
+# target to build an object file
+tests/test_core.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o
+.PHONY : tests/test_core.cpp.o
+
+tests/test_core.i: tests/test_core.cpp.i
+.PHONY : tests/test_core.i
+
+# target to preprocess a source file
+tests/test_core.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.i
+.PHONY : tests/test_core.cpp.i
+
+tests/test_core.s: tests/test_core.cpp.s
+.PHONY : tests/test_core.s
+
+# target to generate assembly for a file
+tests/test_core.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.s
+.PHONY : tests/test_core.cpp.s
+
+tests/test_locator.o: tests/test_locator.cpp.o
+.PHONY : tests/test_locator.o
+
+# target to build an object file
+tests/test_locator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o
+.PHONY : tests/test_locator.cpp.o
+
+tests/test_locator.i: tests/test_locator.cpp.i
+.PHONY : tests/test_locator.i
+
+# target to preprocess a source file
+tests/test_locator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.i
+.PHONY : tests/test_locator.cpp.i
+
+tests/test_locator.s: tests/test_locator.cpp.s
+.PHONY : tests/test_locator.s
+
+# target to generate assembly for a file
+tests/test_locator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.s
+.PHONY : tests/test_locator.cpp.s
+
+tests/test_magnitude.o: tests/test_magnitude.cpp.o
+.PHONY : tests/test_magnitude.o
+
+# target to build an object file
+tests/test_magnitude.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o
+.PHONY : tests/test_magnitude.cpp.o
+
+tests/test_magnitude.i: tests/test_magnitude.cpp.i
+.PHONY : tests/test_magnitude.i
+
+# target to preprocess a source file
+tests/test_magnitude.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.i
+.PHONY : tests/test_magnitude.cpp.i
+
+tests/test_magnitude.s: tests/test_magnitude.cpp.s
+.PHONY : tests/test_magnitude.s
+
+# target to generate assembly for a file
+tests/test_magnitude.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.s
+.PHONY : tests/test_magnitude.cpp.s
+
+tests/test_main.o: tests/test_main.cpp.o
+.PHONY : tests/test_main.o
+
+# target to build an object file
+tests/test_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o
+.PHONY : tests/test_main.cpp.o
+
+tests/test_main.i: tests/test_main.cpp.i
+.PHONY : tests/test_main.i
+
+# target to preprocess a source file
+tests/test_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.i
+.PHONY : tests/test_main.cpp.i
+
+tests/test_main.s: tests/test_main.cpp.s
+.PHONY : tests/test_main.s
+
+# target to generate assembly for a file
+tests/test_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.s
+.PHONY : tests/test_main.cpp.s
+
+tests/test_picker.o: tests/test_picker.cpp.o
+.PHONY : tests/test_picker.o
+
+# target to build an object file
+tests/test_picker.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o
+.PHONY : tests/test_picker.cpp.o
+
+tests/test_picker.i: tests/test_picker.cpp.i
+.PHONY : tests/test_picker.i
+
+# target to preprocess a source file
+tests/test_picker.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.i
+.PHONY : tests/test_picker.cpp.i
+
+tests/test_picker.s: tests/test_picker.cpp.s
+.PHONY : tests/test_picker.s
+
+# target to generate assembly for a file
+tests/test_picker.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/seisproc_tests.dir/build.make CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.s
+.PHONY : tests/test_picker.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -812,8 +1005,12 @@ help:
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... test"
+	@echo "... run_benchmark"
+	@echo "... run_tests"
 	@echo "... seisproc"
 	@echo "... seisproc_core"
+	@echo "... seisproc_tests"
 	@echo "... seissim"
 	@echo "... src/associator/event_builder.o"
 	@echo "... src/associator/event_builder.i"
@@ -890,6 +1087,24 @@ help:
 	@echo "... src/simulator.o"
 	@echo "... src/simulator.i"
 	@echo "... src/simulator.s"
+	@echo "... tests/test_benchmark.o"
+	@echo "... tests/test_benchmark.i"
+	@echo "... tests/test_benchmark.s"
+	@echo "... tests/test_core.o"
+	@echo "... tests/test_core.i"
+	@echo "... tests/test_core.s"
+	@echo "... tests/test_locator.o"
+	@echo "... tests/test_locator.i"
+	@echo "... tests/test_locator.s"
+	@echo "... tests/test_magnitude.o"
+	@echo "... tests/test_magnitude.i"
+	@echo "... tests/test_magnitude.s"
+	@echo "... tests/test_main.o"
+	@echo "... tests/test_main.i"
+	@echo "... tests/test_main.s"
+	@echo "... tests/test_picker.o"
+	@echo "... tests/test_picker.i"
+	@echo "... tests/test_picker.s"
 .PHONY : help
 
 

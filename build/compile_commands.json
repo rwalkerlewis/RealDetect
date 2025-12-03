@@ -148,5 +148,41 @@
   "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seissim.dir/src/simulator.cpp.o -c /workspace/src/simulator.cpp",
   "file": "/workspace/src/simulator.cpp",
   "output": "CMakeFiles/seissim.dir/src/simulator.cpp.o"
+},
+{
+  "directory": "/workspace/build",
+  "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include -I/workspace/tests  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o -c /workspace/tests/test_main.cpp",
+  "file": "/workspace/tests/test_main.cpp",
+  "output": "CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o"
+},
+{
+  "directory": "/workspace/build",
+  "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include -I/workspace/tests  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o -c /workspace/tests/test_core.cpp",
+  "file": "/workspace/tests/test_core.cpp",
+  "output": "CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o"
+},
+{
+  "directory": "/workspace/build",
+  "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include -I/workspace/tests  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o -c /workspace/tests/test_picker.cpp",
+  "file": "/workspace/tests/test_picker.cpp",
+  "output": "CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o"
+},
+{
+  "directory": "/workspace/build",
+  "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include -I/workspace/tests  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o -c /workspace/tests/test_locator.cpp",
+  "file": "/workspace/tests/test_locator.cpp",
+  "output": "CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o"
+},
+{
+  "directory": "/workspace/build",
+  "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include -I/workspace/tests  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o -c /workspace/tests/test_magnitude.cpp",
+  "file": "/workspace/tests/test_magnitude.cpp",
+  "output": "CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o"
+},
+{
+  "directory": "/workspace/build",
+  "command": "/usr/bin/g++  -I/workspace/include/eigen3 -I/workspace/include -I/workspace/tests  -fopenmp -Wall -Wextra -O3 -std=gnu++17 -fopenmp -o CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o -c /workspace/tests/test_benchmark.cpp",
+  "file": "/workspace/tests/test_benchmark.cpp",
+  "output": "CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o"
 }
 ]

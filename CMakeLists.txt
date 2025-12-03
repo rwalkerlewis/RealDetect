@@ -120,3 +120,40 @@ install(DIRECTORY include/
 install(DIRECTORY config/
     DESTINATION share/seisproc/config
 )
+
+# Unit tests
+if(BUILD_TESTS)
+    enable_testing()
+    
+    set(TEST_SOURCES
+        tests/test_main.cpp
+        tests/test_core.cpp
+        tests/test_picker.cpp
+        tests/test_locator.cpp
+        tests/test_magnitude.cpp
+        tests/test_benchmark.cpp
+    )
+    
+    add_executable(seisproc_tests ${TEST_SOURCES})
+    target_include_directories(seisproc_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+    target_link_libraries(seisproc_tests seisproc_core)
+    
+    # Add test target
+    add_test(NAME unit_tests COMMAND seisproc_tests)
+    
+    # Add convenience targets for running tests
+    add_custom_target(run_tests
+        COMMAND seisproc_tests
+        DEPENDS seisproc_tests
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running unit tests..."
+    )
+    
+    # Run specific test suites
+    add_custom_target(run_benchmark
+        COMMAND seisproc_tests BenchmarkPipeline BenchmarkPerformance BenchmarkAccuracy
+        DEPENDS seisproc_tests
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running benchmark tests..."
+    )
+endif()

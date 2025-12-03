@@ -1,0 +1,239 @@
+Start testing: Dec 03 01:38 UTC
+----------------------------------------------------------
+1/1 Testing: unit_tests
+1/1 Test: unit_tests
+Command: "/workspace/build/seisproc_tests"
+Directory: /workspace/build
+"unit_tests" start time: Dec 03 01:38 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== AICPicker ===
+  ✓ ComputeAIC (0.03ms)
+  ✓ FindAICMinimum (0.00ms)
+  ✓ RefinePick (0.01ms)
+
+=== BenchmarkAccuracy ===
+    Location error vs pick noise:
+      Noise=0.00s -> Error=3.53 km
+      Noise=0.10s -> Error=1.00 km
+      Noise=0.20s -> Error=8.11 km
+      Noise=0.50s -> Error=0.38 km
+      Noise=1.00s -> Error=22.17 km
+  ✓ LocationVsNoise (8.14ms)
+    Location error vs station count:
+      Stations=3 -> Error=0.00 km
+      Stations=4 -> Error=0.00 km
+      Stations=6 -> Error=0.00 km
+      Stations=8 -> Error=0.00 km
+      Stations=12 -> Error=0.00 km
+  ✓ LocationVsStationCount (6.89ms)
+
+=== BenchmarkPerformance ===
+    Picker processed 10 min in 0.89 ms
+  ✓ PickerSpeed (1.69ms)
+    Geiger located in 0.16 ms (20 iterations)
+  ✓ LocatorSpeed (1.69ms)
+    Grid search completed in 203.12 ms
+  ✓ GridSearchSpeed (204.50ms)
+
+=== BenchmarkPipeline ===
+  ✓ SmallLocalEvent (319.93ms)
+  ✓ ModerateRegionalEvent (700.89ms)
+  ✓ NorthridgeScenario (444.32ms)
+
+=== BodyWaveMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+
+=== CharacteristicFunction ===
+  ✓ Envelope (0.06ms)
+  ✓ Kurtosis (4.96ms)
+  ✓ EnergyRatio (0.05ms)
+
+=== Config ===
+  ✓ SetAndGet (0.01ms)
+  ✓ DefaultValues (0.00ms)
+  ✓ HasKey (0.00ms)
+
+=== DurationMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetCoefficients (0.00ms)
+
+=== Event ===
+  ✓ CreateWithId (0.00ms)
+  ✓ AutoId (0.08ms)
+  ✓ AddOrigin (0.01ms)
+  ✓ AddMagnitude (0.01ms)
+  ✓ ConvenienceAccessors (0.01ms)
+
+=== FFT ===
+  ✓ ForwardInverse (0.00ms)
+  ✓ PowerSpectrum (0.01ms)
+  ✓ DominantFrequency (0.01ms)
+  ✓ NextPow2 (0.00ms)
+
+=== FilterBank ===
+  ✓ AddBands (0.00ms)
+  ✓ Configure (0.01ms)
+  ✓ Filter (0.05ms)
+
+=== GeigerLocator ===
+  ✓ DefaultParameters (0.83ms)
+  ✓ SetParameters (0.74ms)
+  ✓ LocatePerfectData (775.88ms)
+  ✓ LocateWithNoise (1.55ms)
+  ✓ Relocate (773.74ms)
+  ✓ FixedDepth (1.48ms)
+  ✓ RMSImprovement (773.09ms)
+
+=== GeoPoint ===
+  ✓ Constructor (0.00ms)
+  ✓ DefaultConstructor (0.00ms)
+  ✓ DistanceToSamePoint (0.00ms)
+  ✓ DistanceToNearby (0.00ms)
+  ✓ DistanceLondon_NewYork (0.00ms)
+  ✓ AzimuthNorth (0.00ms)
+  ✓ AzimuthEast (0.00ms)
+  ✓ AzimuthSouth (0.00ms)
+
+=== GridSearchLocator ===
+  ✓ DefaultParameters (0.72ms)
+  ✓ SetParameters (0.70ms)
+  ✓ LocatePerfectData (198.09ms)
+  ✓ LocateWithNoise (775.86ms)
+  ✓ FixedDepth (33.55ms)
+
+=== IIRFilter ===
+  ✓ ButterworthBandpass (0.01ms)
+  ✓ FilterConstant (0.01ms)
+  ✓ FilterHighFrequency (0.03ms)
+  ✓ FiltFiltZeroPhase (0.03ms)
+
+=== LocalMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+  ✓ CalculateWithSyntheticData (0.62ms)
+  ✓ StationCorrection (0.64ms)
+  ✓ DistanceFiltering (0.60ms)
+
+=== LocationQuality ===
+  ✓ ComputeGap (1.41ms)
+  ✓ PhaseCount (1.36ms)
+
+=== LocatorFactory ===
+  ✓ CreateGridSearch (0.72ms)
+  ✓ CreateGeiger (0.71ms)
+  ✓ CreateOctTree (0.00ms)
+  ✓ AvailableAlgorithms (0.00ms)
+
+=== MagnitudeFactory ===
+  ✓ CreateML (0.03ms)
+  ✓ CreateMw (0.00ms)
+  ✓ CreateMb (0.00ms)
+  ✓ CreateMs (0.00ms)
+  ✓ CreateMd (0.00ms)
+  ✓ AvailableTypes (0.00ms)
+
+=== MagnitudeIntegration ===
+  ✓ MLConsistency (0.61ms)
+  ✓ NetworkMagnitude (0.63ms)
+
+=== MomentMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+  ✓ BruneSpectrum (0.63ms)
+
+=== OctTreeLocator ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetSearchBounds (0.00ms)
+  ✓ LocatePerfectData (142.53ms)
+
+=== Origin ===
+  ✓ QualityCode (0.00ms)
+
+=== PhaseType ===
+  ✓ ToString (0.00ms)
+  ✓ FromString (0.00ms)
+
+=== Pick ===
+  ✓ Weight (0.00ms)
+  ✓ LocationWeight (0.00ms)
+
+=== RecursiveSTALTA ===
+  ✓ Initialize (0.00ms)
+  ✓ ProcessSamples (0.00ms)
+  ✓ DetectAmplitudeChange (0.00ms)
+  ✓ Reset (0.01ms)
+
+=== STALTAPicker ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+  ✓ SetParameterByName (0.00ms)
+  ✓ NoPickOnNoise (0.06ms)
+  ✓ DetectClearArrival (0.09ms)
+  ✓ CharacteristicFunction (0.07ms)
+  ✓ MultiplePicks (0.14ms)
+
+=== Station ===
+  ✓ Constructor (0.00ms)
+  ✓ AddChannel (0.00ms)
+  ✓ DistanceTo (0.00ms)
+
+=== StationInventory ===
+  ✓ AddAndGet (0.00ms)
+  ✓ StationsWithin (0.00ms)
+
+=== StreamID ===
+  ✓ Constructor (0.00ms)
+  ✓ ToString (0.00ms)
+  ✓ Equality (0.00ms)
+  ✓ Comparison (0.00ms)
+
+=== SurfaceWaveMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+
+=== TravelTimeTable ===
+  ✓ Initialize (0.18ms)
+  ✓ GetTime (0.19ms)
+  ✓ Derivatives (0.19ms)
+
+=== VelocityModel ===
+  ✓ SimpleThreeLayer (0.00ms)
+  ✓ IASP91 (0.00ms)
+  ✓ TravelTime (0.00ms)
+  ✓ AddLayer (0.00ms)
+
+=== Waveform ===
+  ✓ Constructor (0.00ms)
+  ✓ AppendSamples (0.00ms)
+  ✓ Mean (0.00ms)
+  ✓ Demean (0.00ms)
+  ✓ AbsMax (0.00ms)
+  ✓ Normalize (0.00ms)
+  ✓ Slice (0.00ms)
+  ✓ Duration (0.00ms)
+
+========================================
+Test Summary
+========================================
+Passed: 124/124
+Failed: 0
+Total time: 5181.08ms
+========================================
+<end of output>
+Test time =   5.18 sec
+----------------------------------------------------------
+Test Passed.
+"unit_tests" end time: Dec 03 01:38 UTC
+"unit_tests" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Dec 03 01:38 UTC
