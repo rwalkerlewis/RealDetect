@@ -1,0 +1,26 @@
+# Cascadia Subduction Zone Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Model for the Pacific Northwest (Washington, Oregon)
+# Includes effects of subducting Juan de Fuca plate
+#
+# Reference: Various Cascadia tomography studies
+# Continental Moho: ~35 km, subducting slab top: variable
+
+# Sediments
+0.0     5.0     4.00    2.31    2.30
+
+# Upper crust (accreted terranes)
+5.0     10.0    6.10    3.52    2.70
+
+# Middle crust
+15.0    10.0    6.40    3.70    2.85
+
+# Lower crust
+25.0    10.0    6.80    3.93    2.95
+
+# Mantle wedge (serpentinized)
+35.0    10.0    7.60    4.39    3.20
+
+# Normal mantle
+45.0    0.0     8.10    4.68    3.40

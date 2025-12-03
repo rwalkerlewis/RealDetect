@@ -1,0 +1,26 @@
+# Japan Regional Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Model for the Japanese Islands
+# Complex structure due to multiple subducting plates
+#
+# Reference: JMA velocity model
+# Moho depth: ~30-35 km (continental), ~10 km (oceanic)
+
+# Sediments
+0.0     3.0     4.20    2.42    2.30
+
+# Upper crust
+3.0     12.0    5.80    3.35    2.65
+
+# Middle crust
+15.0    10.0    6.40    3.70    2.85
+
+# Lower crust
+25.0    8.0     6.80    3.93    2.95
+
+# Upper mantle
+33.0    17.0    7.80    4.50    3.25
+
+# Deeper mantle
+50.0    0.0     8.00    4.62    3.35

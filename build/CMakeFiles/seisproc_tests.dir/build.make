@@ -73,85 +73,85 @@ CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o: CMakeFiles/seisproc_tests.d
 CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o: /workspace/tests/test_main.cpp
 CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o: CMakeFiles/seisproc_tests.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o -c /workspace/tests/test_main.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.o -c /workspace/tests/test_main.cpp
 
 CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_main.cpp > CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_main.cpp > CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.i
 
 CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_main.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_main.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_main.cpp.s
 
 CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o: CMakeFiles/seisproc_tests.dir/flags.make
 CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o: /workspace/tests/test_core.cpp
 CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o: CMakeFiles/seisproc_tests.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o -c /workspace/tests/test_core.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.o -c /workspace/tests/test_core.cpp
 
 CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_core.cpp > CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_core.cpp > CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.i
 
 CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_core.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_core.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_core.cpp.s
 
 CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o: CMakeFiles/seisproc_tests.dir/flags.make
 CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o: /workspace/tests/test_picker.cpp
 CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o: CMakeFiles/seisproc_tests.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o -c /workspace/tests/test_picker.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.o -c /workspace/tests/test_picker.cpp
 
 CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_picker.cpp > CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_picker.cpp > CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.i
 
 CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_picker.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_picker.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_picker.cpp.s
 
 CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o: CMakeFiles/seisproc_tests.dir/flags.make
 CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o: /workspace/tests/test_locator.cpp
 CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o: CMakeFiles/seisproc_tests.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o -c /workspace/tests/test_locator.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.o -c /workspace/tests/test_locator.cpp
 
 CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_locator.cpp > CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_locator.cpp > CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.i
 
 CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_locator.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_locator.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_locator.cpp.s
 
 CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o: CMakeFiles/seisproc_tests.dir/flags.make
 CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o: /workspace/tests/test_magnitude.cpp
 CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o: CMakeFiles/seisproc_tests.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o -c /workspace/tests/test_magnitude.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o -c /workspace/tests/test_magnitude.cpp
 
 CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_magnitude.cpp > CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_magnitude.cpp > CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.i
 
 CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_magnitude.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_magnitude.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.s
 
 CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o: CMakeFiles/seisproc_tests.dir/flags.make
 CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o: /workspace/tests/test_benchmark.cpp
 CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o: CMakeFiles/seisproc_tests.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o -c /workspace/tests/test_benchmark.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o -MF CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o.d -o CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o -c /workspace/tests/test_benchmark.cpp
 
 CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_benchmark.cpp > CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/tests/test_benchmark.cpp > CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.i
 
 CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_benchmark.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/tests/test_benchmark.cpp -o CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.s
 
 # Object files for target seisproc_tests
 seisproc_tests_OBJECTS = \
@@ -173,8 +173,7 @@ seisproc_tests: CMakeFiles/seisproc_tests.dir/tests/test_magnitude.cpp.o
 seisproc_tests: CMakeFiles/seisproc_tests.dir/tests/test_benchmark.cpp.o
 seisproc_tests: CMakeFiles/seisproc_tests.dir/build.make
 seisproc_tests: libseisproc_core.a
-seisproc_tests: /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so
-seisproc_tests: /usr/lib/x86_64-linux-gnu/libpthread.a
+seisproc_tests: /usr/lib/x86_64-linux-gnu/libsqlite3.so
 seisproc_tests: CMakeFiles/seisproc_tests.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable seisproc_tests"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/seisproc_tests.dir/link.txt --verbose=$(VERBOSE)

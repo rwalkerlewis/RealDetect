@@ -73,15 +73,15 @@ CMakeFiles/seissim.dir/src/simulator.cpp.o: CMakeFiles/seissim.dir/flags.make
 CMakeFiles/seissim.dir/src/simulator.cpp.o: /workspace/src/simulator.cpp
 CMakeFiles/seissim.dir/src/simulator.cpp.o: CMakeFiles/seissim.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/seissim.dir/src/simulator.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seissim.dir/src/simulator.cpp.o -MF CMakeFiles/seissim.dir/src/simulator.cpp.o.d -o CMakeFiles/seissim.dir/src/simulator.cpp.o -c /workspace/src/simulator.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/seissim.dir/src/simulator.cpp.o -MF CMakeFiles/seissim.dir/src/simulator.cpp.o.d -o CMakeFiles/seissim.dir/src/simulator.cpp.o -c /workspace/src/simulator.cpp
 
 CMakeFiles/seissim.dir/src/simulator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/seissim.dir/src/simulator.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/simulator.cpp > CMakeFiles/seissim.dir/src/simulator.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspace/src/simulator.cpp > CMakeFiles/seissim.dir/src/simulator.cpp.i
 
 CMakeFiles/seissim.dir/src/simulator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/seissim.dir/src/simulator.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/simulator.cpp -o CMakeFiles/seissim.dir/src/simulator.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspace/src/simulator.cpp -o CMakeFiles/seissim.dir/src/simulator.cpp.s
 
 # Object files for target seissim
 seissim_OBJECTS = \
@@ -93,8 +93,7 @@ seissim_EXTERNAL_OBJECTS =
 seissim: CMakeFiles/seissim.dir/src/simulator.cpp.o
 seissim: CMakeFiles/seissim.dir/build.make
 seissim: libseisproc_core.a
-seissim: /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so
-seissim: /usr/lib/x86_64-linux-gnu/libpthread.a
+seissim: /usr/lib/x86_64-linux-gnu/libsqlite3.so
 seissim: CMakeFiles/seissim.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspace/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable seissim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/seissim.dir/link.txt --verbose=$(VERBOSE)

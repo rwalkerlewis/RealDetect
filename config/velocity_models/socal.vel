@@ -1,0 +1,21 @@
+# Southern California Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Based on Hadley-Kanamori model with modifications
+# for the Los Angeles Basin and surrounding regions
+#
+# Reference: Hadley & Kanamori (1977), BSSA
+# Moho depth: ~32 km
+
+# Sediments / upper crust
+0.0     5.0     5.50    3.18    2.60
+5.0     10.0    6.00    3.46    2.75
+
+# Middle crust
+15.0    10.0    6.30    3.64    2.85
+
+# Lower crust
+25.0    7.0     6.70    3.87    2.95
+
+# Moho transition / uppermost mantle
+32.0    0.0     7.80    4.50    3.30

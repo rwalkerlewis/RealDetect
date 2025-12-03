@@ -1,0 +1,15 @@
+# IASP91 Global Reference Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Reference: Kennett & Engdahl (1991)
+# Simplified crustal/upper mantle structure
+
+# Crust
+0.0     20.0    5.80    3.36    2.60
+20.0    15.0    6.50    3.75    2.90
+
+# Upper Mantle
+35.0    77.5    8.04    4.47    3.38
+112.5   52.5    8.05    4.50    3.38
+165.0   45.0    8.17    4.51    3.39
+210.0   0.0     8.30    4.52    3.40
