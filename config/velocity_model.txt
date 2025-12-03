@@ -1,0 +1,23 @@
+# SeisProc 1D Velocity Model
+# Format: Depth(km) Thickness(km) Vp(km/s) Vs(km/s) Density(g/cm³)
+#
+# Southern California Velocity Model (modified IASP91)
+
+# Layer    Depth   Thick   Vp      Vs      Density
+0.0        5.0     5.50    3.18    2.60
+5.0        10.0    6.00    3.46    2.75
+15.0       17.0    6.50    3.75    2.90
+32.0       0.0     7.80    4.50    3.30
+
+# Notes:
+# - Last layer (0 thickness) represents halfspace
+# - Moho depth: ~32 km
+# - This is a simplified model for Southern California
+#
+# For IASP91 global model:
+# 0.0    20.0    5.80    3.36    2.60
+# 20.0   15.0    6.50    3.75    2.90
+# 35.0   77.5    8.04    4.47    3.38
+# 112.5  52.5    8.05    4.50    3.38
+# 165.0  45.0    8.17    4.51    3.39
+# 210.0  0.0     8.30    4.52    3.40
