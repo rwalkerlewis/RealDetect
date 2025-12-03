@@ -1,0 +1,252 @@
+// Minimal Eigen-compatible header for SeisProc
+// Provides basic matrix/vector operations needed for Geiger inversion
+// For full functionality, install Eigen3: apt-get install libeigen3-dev
+
+#pragma once
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+
+namespace Eigen {
+
+// Forward declarations
+template<typename Scalar> class Matrix;
+template<typename Scalar> class Vector;
+
+// Dynamic-sized vector
+template<typename Scalar = double>
+class Vector {
+public:
+    Vector() : n_(0) {}
+    explicit Vector(int n) : n_(n), data_(n, Scalar(0)) {}
+    
+    int size() const { return n_; }
+    void resize(int n) { n_ = n; data_.resize(n, Scalar(0)); }
+    
+    Scalar& operator()(int i) { return data_[i]; }
+    const Scalar& operator()(int i) const { return data_[i]; }
+    
+    Scalar* data() { return data_.data(); }
+    const Scalar* data() const { return data_.data(); }
+    
+    void setZero() { std::fill(data_.begin(), data_.end(), Scalar(0)); }
+    
+    static Vector Constant(int n, Scalar val) {
+        Vector v(n);
+        std::fill(v.data_.begin(), v.data_.end(), val);
+        return v;
+    }
+    
+    Vector operator+(const Vector& other) const {
+        Vector result(n_);
+        for (int i = 0; i < n_; i++) result.data_[i] = data_[i] + other.data_[i];
+        return result;
+    }
+    
+    Vector operator-(const Vector& other) const {
+        Vector result(n_);
+        for (int i = 0; i < n_; i++) result.data_[i] = data_[i] - other.data_[i];
+        return result;
+    }
+    
+    Vector operator*(Scalar s) const {
+        Vector result(n_);
+        for (int i = 0; i < n_; i++) result.data_[i] = data_[i] * s;
+        return result;
+    }
+    
+    Scalar dot(const Vector& other) const {
+        Scalar sum = 0;
+        for (int i = 0; i < n_; i++) sum += data_[i] * other.data_[i];
+        return sum;
+    }
+    
+    Scalar norm() const { return std::sqrt(dot(*this)); }
+    
+    Vector& operator+=(const Vector& other) {
+        for (int i = 0; i < n_; i++) data_[i] += other.data_[i];
+        return *this;
+    }
+    
+private:
+    int n_;
+    std::vector<Scalar> data_;
+};
+
+using VectorXd = Vector<double>;
+
+// Dynamic-sized matrix
+template<typename Scalar = double>
+class Matrix {
+public:
+    Matrix() : rows_(0), cols_(0) {}
+    Matrix(int rows, int cols) : rows_(rows), cols_(cols), data_(rows * cols, Scalar(0)) {}
+    
+    int rows() const { return rows_; }
+    int cols() const { return cols_; }
+    void resize(int rows, int cols) {
+        rows_ = rows; cols_ = cols;
+        data_.resize(rows * cols, Scalar(0));
+    }
+    
+    Scalar& operator()(int i, int j) { return data_[i * cols_ + j]; }
+    const Scalar& operator()(int i, int j) const { return data_[i * cols_ + j]; }
+    
+    void setZero() { std::fill(data_.begin(), data_.end(), Scalar(0)); }
+    
+    // Row access
+    class RowProxy {
+    public:
+        RowProxy(Matrix& m, int row) : m_(m), row_(row) {}
+        void setZero() {
+            for (int j = 0; j < m_.cols_; j++) m_(row_, j) = Scalar(0);
+        }
+    private:
+        Matrix& m_;
+        int row_;
+    };
+    
+    RowProxy row(int i) { return RowProxy(*this, i); }
+    
+    // Transpose
+    Matrix transpose() const {
+        Matrix result(cols_, rows_);
+        for (int i = 0; i < rows_; i++) {
+            for (int j = 0; j < cols_; j++) {
+                result(j, i) = (*this)(i, j);
+            }
+        }
+        return result;
+    }
+    
+    // Matrix-vector multiplication
+    Vector<Scalar> operator*(const Vector<Scalar>& v) const {
+        Vector<Scalar> result(rows_);
+        for (int i = 0; i < rows_; i++) {
+            Scalar sum = 0;
+            for (int j = 0; j < cols_; j++) {
+                sum += (*this)(i, j) * v(j);
+            }
+            result(i) = sum;
+        }
+        return result;
+    }
+    
+    // Matrix-matrix multiplication
+    Matrix operator*(const Matrix& other) const {
+        Matrix result(rows_, other.cols_);
+        for (int i = 0; i < rows_; i++) {
+            for (int j = 0; j < other.cols_; j++) {
+                Scalar sum = 0;
+                for (int k = 0; k < cols_; k++) {
+                    sum += (*this)(i, k) * other(k, j);
+                }
+                result(i, j) = sum;
+            }
+        }
+        return result;
+    }
+    
+    // Diagonal vector
+    Vector<Scalar> diagonal() const {
+        int n = std::min(rows_, cols_);
+        Vector<Scalar> d(n);
+        for (int i = 0; i < n; i++) d(i) = (*this)(i, i);
+        return d;
+    }
+    
+    // Add to diagonal
+    void addToDiagonal(const Vector<Scalar>& v) {
+        int n = std::min({rows_, cols_, v.size()});
+        for (int i = 0; i < n; i++) (*this)(i, i) += v(i);
+    }
+    
+    // Simple matrix inverse using Gauss-Jordan
+    Matrix inverse() const {
+        if (rows_ != cols_) throw std::runtime_error("Matrix must be square");
+        int n = rows_;
+        
+        Matrix aug(n, 2*n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) aug(i, j) = (*this)(i, j);
+            aug(i, n + i) = 1;
+        }
+        
+        // Forward elimination
+        for (int i = 0; i < n; i++) {
+            // Find pivot
+            int max_row = i;
+            for (int k = i + 1; k < n; k++) {
+                if (std::abs(aug(k, i)) > std::abs(aug(max_row, i))) max_row = k;
+            }
+            
+            // Swap rows
+            for (int j = 0; j < 2*n; j++) std::swap(aug(i, j), aug(max_row, j));
+            
+            // Scale row
+            Scalar pivot = aug(i, i);
+            if (std::abs(pivot) < 1e-12) throw std::runtime_error("Matrix is singular");
+            for (int j = 0; j < 2*n; j++) aug(i, j) /= pivot;
+            
+            // Eliminate column
+            for (int k = 0; k < n; k++) {
+                if (k != i) {
+                    Scalar factor = aug(k, i);
+                    for (int j = 0; j < 2*n; j++) aug(k, j) -= factor * aug(i, j);
+                }
+            }
+        }
+        
+        Matrix result(n, n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) result(i, j) = aug(i, n + j);
+        }
+        return result;
+    }
+    
+    // LDLT decomposition solver (simplified)
+    class LDLTSolver {
+    public:
+        LDLTSolver(const Matrix& m) : m_(m) {}
+        
+        Vector<Scalar> solve(const Vector<Scalar>& b) const {
+            // Simple solve using inverse
+            return m_.inverse() * b;
+        }
+        
+    private:
+        Matrix m_;
+    };
+    
+    LDLTSolver ldlt() const { return LDLTSolver(*this); }
+    
+    // Create diagonal matrix from vector
+    static Matrix asDiagonal(const Vector<Scalar>& v) {
+        int n = v.size();
+        Matrix result(n, n);
+        for (int i = 0; i < n; i++) result(i, i) = v(i);
+        return result;
+    }
+
+private:
+    int rows_, cols_;
+    std::vector<Scalar> data_;
+};
+
+using MatrixXd = Matrix<double>;
+
+// Helper: vector as diagonal matrix
+inline MatrixXd VectorXd_asDiagonal(const VectorXd& v) {
+    return MatrixXd::asDiagonal(v);
+}
+
+} // namespace Eigen
+
+// Make VectorXd have asDiagonal method via extension
+namespace Eigen {
+    inline MatrixXd asDiagonalMatrix(const VectorXd& v) {
+        return MatrixXd::asDiagonal(v);
+    }
+}
