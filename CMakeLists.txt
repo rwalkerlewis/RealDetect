@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SeisProc VERSION 1.0.0 LANGUAGES CXX)
+project(RealDetect VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -78,6 +78,7 @@ set(SEEDLINK_SOURCES
 set(PICKER_SOURCES
     src/picker/stalta_picker.cpp
     src/picker/aic_picker.cpp
+    src/picker/ml_picker.cpp
     src/picker/characteristic_function.cpp
     src/picker/filter_bank.cpp
 )
@@ -102,7 +103,7 @@ set(MAGNITUDE_SOURCES
 )
 
 # Core library
-add_library(seisproc_core STATIC
+add_library(realdetect_core STATIC
     ${CORE_SOURCES}
     ${DATABASE_SOURCES}
     ${SEEDLINK_SOURCES}
@@ -114,34 +115,34 @@ add_library(seisproc_core STATIC
 
 # Link SQLite3
 if(SQLite3_FOUND)
-    target_link_libraries(seisproc_core ${SQLite3_LIBRARIES})
-    target_include_directories(seisproc_core PRIVATE ${SQLite3_INCLUDE_DIRS})
+    target_link_libraries(realdetect_core ${SQLite3_LIBRARIES})
+    target_include_directories(realdetect_core PRIVATE ${SQLite3_INCLUDE_DIRS})
 elseif(SQLITE3_FOUND)
-    target_link_libraries(seisproc_core ${SQLITE3_LIBRARIES})
-    target_include_directories(seisproc_core PRIVATE ${SQLITE3_INCLUDE_DIRS})
+    target_link_libraries(realdetect_core ${SQLITE3_LIBRARIES})
+    target_include_directories(realdetect_core PRIVATE ${SQLITE3_INCLUDE_DIRS})
 else()
-    target_link_libraries(seisproc_core sqlite3)
+    target_link_libraries(realdetect_core sqlite3)
 endif()
 
-target_link_libraries(seisproc_core
+target_link_libraries(realdetect_core
     Threads::Threads
     ${CMAKE_DL_LIBS}
 )
 
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(seisproc_core OpenMP::OpenMP_CXX)
+    target_link_libraries(realdetect_core OpenMP::OpenMP_CXX)
 endif()
 
 # Main executable
-add_executable(seisproc src/main.cpp)
-target_link_libraries(seisproc seisproc_core)
+add_executable(realdetect src/main.cpp)
+target_link_libraries(realdetect realdetect_core)
 
 # Simulator for testing
-add_executable(seissim src/simulator.cpp)
-target_link_libraries(seissim seisproc_core)
+add_executable(realdetect_sim src/simulator.cpp)
+target_link_libraries(realdetect_sim realdetect_core)
 
 # Install targets
-install(TARGETS seisproc seissim
+install(TARGETS realdetect realdetect_sim
     RUNTIME DESTINATION bin
 )
 
@@ -151,7 +152,7 @@ install(DIRECTORY include/
 
 # Copy config files
 install(DIRECTORY config/
-    DESTINATION share/seisproc/config
+    DESTINATION share/realdetect/config
 )
 
 # Unit tests
@@ -167,25 +168,25 @@ if(BUILD_TESTS)
         tests/test_benchmark.cpp
     )
     
-    add_executable(seisproc_tests ${TEST_SOURCES})
-    target_include_directories(seisproc_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
-    target_link_libraries(seisproc_tests seisproc_core)
+    add_executable(realdetect_tests ${TEST_SOURCES})
+    target_include_directories(realdetect_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+    target_link_libraries(realdetect_tests realdetect_core)
     
     # Add test target
-    add_test(NAME unit_tests COMMAND seisproc_tests)
+    add_test(NAME unit_tests COMMAND realdetect_tests)
     
     # Add convenience targets for running tests
     add_custom_target(run_tests
-        COMMAND seisproc_tests
-        DEPENDS seisproc_tests
+        COMMAND realdetect_tests
+        DEPENDS realdetect_tests
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running unit tests..."
     )
     
     # Run specific test suites
     add_custom_target(run_benchmark
-        COMMAND seisproc_tests BenchmarkPipeline BenchmarkPerformance BenchmarkAccuracy
-        DEPENDS seisproc_tests
+        COMMAND realdetect_tests BenchmarkPipeline BenchmarkPerformance BenchmarkAccuracy
+        DEPENDS realdetect_tests
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running benchmark tests..."
     )

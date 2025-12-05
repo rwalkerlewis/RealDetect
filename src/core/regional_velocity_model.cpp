@@ -2,7 +2,7 @@
  * Regional Velocity Model Manager Implementation
  */
 
-#include "seisproc/core/regional_velocity_model.hpp"
+#include "realdetect/core/regional_velocity_model.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -10,7 +10,7 @@
 #include <cmath>
 #include <filesystem>
 
-namespace seisproc {
+namespace realdetect {
 
 //=============================================================================
 // GeographicBounds Implementation
@@ -679,4 +679,4 @@ GeographicBounds RegionalModelConfig::parseBounds() const {
     return GeographicBounds::boundingBox(-90, 90, -180, 180);
 }
 
-} // namespace seisproc
+} // namespace realdetect

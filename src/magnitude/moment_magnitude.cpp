@@ -1,11 +1,11 @@
-#include "seisproc/magnitude/moment_magnitude.hpp"
-#include "seisproc/magnitude/local_magnitude.hpp"
-#include "seisproc/picker/filter_bank.hpp"
+#include "realdetect/magnitude/moment_magnitude.hpp"
+#include "realdetect/magnitude/local_magnitude.hpp"
+#include "realdetect/picker/filter_bank.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
 
-namespace seisproc {
+namespace realdetect {
 
 MomentMagnitude::MomentMagnitude()
     : density_(2700.0)        // kg/m³
@@ -486,4 +486,4 @@ std::vector<MagnitudeType> MagnitudeFactory::availableTypes() {
             MagnitudeType::Ms, MagnitudeType::Md};
 }
 
-} // namespace seisproc
+} // namespace realdetect

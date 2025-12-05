@@ -1,10 +1,10 @@
-#include "seisproc/core/config.hpp"
+#include "realdetect/core/config.hpp"
 
 // Config implementation is header-only
 // This file is for future extensions if needed
 
-namespace seisproc {
+namespace realdetect {
 
 // Placeholder for future config extensions
 
-} // namespace seisproc
+} // namespace realdetect

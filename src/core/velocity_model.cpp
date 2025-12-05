@@ -1,10 +1,10 @@
-#include "seisproc/core/velocity_model.hpp"
+#include "realdetect/core/velocity_model.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <cmath>
 
-namespace seisproc {
+namespace realdetect {
 
 double VelocityModel1D::travelTime(double distance, double depth, PhaseType phase) const {
     if (layers_.empty()) return 0;
@@ -86,4 +86,4 @@ VelocityModel1D VelocityModel1D::simpleThreeLayer() {
     return model;
 }
 
-} // namespace seisproc
+} // namespace realdetect

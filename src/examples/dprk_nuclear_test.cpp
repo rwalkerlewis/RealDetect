@@ -31,20 +31,20 @@
 #include <random>
 #include <chrono>
 
-#include "seisproc/core/types.hpp"
-#include "seisproc/core/config.hpp"
-#include "seisproc/core/station.hpp"
-#include "seisproc/core/event.hpp"
-#include "seisproc/core/velocity_model.hpp"
-#include "seisproc/core/regional_velocity_model.hpp"
-#include "seisproc/core/waveform.hpp"
-#include "seisproc/database/css30_database.hpp"
-#include "seisproc/picker/stalta_picker.hpp"
-#include "seisproc/associator/phase_associator.hpp"
-#include "seisproc/locator/geiger.hpp"
-#include "seisproc/magnitude/local_magnitude.hpp"
+#include "realdetect/core/types.hpp"
+#include "realdetect/core/config.hpp"
+#include "realdetect/core/station.hpp"
+#include "realdetect/core/event.hpp"
+#include "realdetect/core/velocity_model.hpp"
+#include "realdetect/core/regional_velocity_model.hpp"
+#include "realdetect/core/waveform.hpp"
+#include "realdetect/database/css30_database.hpp"
+#include "realdetect/picker/stalta_picker.hpp"
+#include "realdetect/associator/phase_associator.hpp"
+#include "realdetect/locator/geiger.hpp"
+#include "realdetect/magnitude/local_magnitude.hpp"
 
-using namespace seisproc;
+using namespace realdetect;
 
 // ============================================================================
 // Ground Truth: 2017-09-03 DPRK Nuclear Test Parameters
@@ -199,8 +199,6 @@ WaveformPtr generateExplosionWaveform(const StationInfo& station,
                                        double magnitude,
                                        TimePoint origin_time,
                                        double sample_rate = 100.0) {
-    // Create waveform
-    auto waveform = std::make_shared<Waveform>();
     StreamID id(station.network, station.code, "00", "BHZ");
     
     // Duration: 120 seconds of data
@@ -264,10 +262,10 @@ WaveformPtr generateExplosionWaveform(const StationInfo& station,
     
     // Set waveform start time (lead_time before origin)
     TimePoint start_time = origin_time - std::chrono::seconds(static_cast<int>(lead_time));
-    waveform->setStreamId(id);
-    waveform->setSampleRate(sample_rate);
-    waveform->setStartTime(start_time);
-    waveform->setSamples(samples);
+    
+    // Create waveform with constructor and set data
+    auto waveform = std::make_shared<Waveform>(id, sample_rate, start_time);
+    waveform->data() = samples;
     
     return waveform;
 }

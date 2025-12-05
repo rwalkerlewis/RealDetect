@@ -1,8 +1,8 @@
-#include "seisproc/picker/filter_bank.hpp"
+#include "realdetect/picker/filter_bank.hpp"
 #include <cmath>
 #include <algorithm>
 
-namespace seisproc {
+namespace realdetect {
 
 // IIRFilter implementation
 
@@ -395,4 +395,4 @@ size_t FFT::nextPow2(size_t n) {
     return p;
 }
 
-} // namespace seisproc
+} // namespace realdetect

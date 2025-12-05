@@ -1,5 +1,5 @@
 /**
- * SeisProc Simulator
+ * RealDetect Simulator
  * 
  * Generates synthetic seismic waveforms for testing the processing system.
  * Creates realistic P and S wave arrivals with noise.
@@ -13,19 +13,19 @@
 #include <fstream>
 #include <iomanip>
 
-#include "seisproc/core/types.hpp"
-#include "seisproc/core/waveform.hpp"
-#include "seisproc/core/station.hpp"
-#include "seisproc/core/event.hpp"
-#include "seisproc/core/velocity_model.hpp"
-#include "seisproc/picker/stalta_picker.hpp"
-#include "seisproc/picker/aic_picker.hpp"
-#include "seisproc/associator/phase_associator.hpp"
-#include "seisproc/locator/grid_search.hpp"
-#include "seisproc/locator/geiger.hpp"
-#include "seisproc/magnitude/local_magnitude.hpp"
+#include "realdetect/core/types.hpp"
+#include "realdetect/core/waveform.hpp"
+#include "realdetect/core/station.hpp"
+#include "realdetect/core/event.hpp"
+#include "realdetect/core/velocity_model.hpp"
+#include "realdetect/picker/stalta_picker.hpp"
+#include "realdetect/picker/aic_picker.hpp"
+#include "realdetect/associator/phase_associator.hpp"
+#include "realdetect/locator/grid_search.hpp"
+#include "realdetect/locator/geiger.hpp"
+#include "realdetect/magnitude/local_magnitude.hpp"
 
-using namespace seisproc;
+using namespace realdetect;
 
 class SeismicSimulator {
 public:

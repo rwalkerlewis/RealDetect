@@ -1,9 +1,9 @@
-#include "seisproc/core/station.hpp"
+#include "realdetect/core/station.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
-namespace seisproc {
+namespace realdetect {
 
 bool StationInventory::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
@@ -74,4 +74,4 @@ bool StationInventory::saveToFile(const std::string& filename) const {
     return true;
 }
 
-} // namespace seisproc
+} // namespace realdetect

@@ -1,4 +1,4 @@
-# SeisProc - Real-time Seismic Event Processing System
+# RealDetect - Real-time Seismic Event Processing System
 
 A comprehensive C++ seismic processing system inspired by [SeisComP](https://www.seiscomp.de/) for real-time earthquake detection, location, and magnitude calculation.
 
@@ -8,10 +8,14 @@ A comprehensive C++ seismic processing system inspired by [SeisComP](https://www
 - **SeedLink Client**: Real-time data streaming from SeedLink servers
 - **MiniSEED Parser**: Native support for SEED data format with Steim1/Steim2 decompression
 - **Multi-stream Buffering**: Efficient circular buffer management for multiple channels
+- **Playback Mode**: Process MiniSEED files for offline analysis or testing
 
 ### Phase Picking
 - **STA/LTA Detector**: Classic Short-Term/Long-Term Average ratio trigger
 - **AIC Picker**: Akaike Information Criterion for precise pick refinement
+- **ML Picker**: Machine learning based phase detection with pluggable backends
+  - Built-in characteristic function detector
+  - ONNX Runtime support for neural network models (PhaseNet, EQTransformer, etc.)
 - **AR Picker**: Autoregressive prediction error method
 - **Characteristic Functions**: 
   - Envelope (Hilbert transform)
@@ -65,6 +69,7 @@ A comprehensive C++ seismic processing system inspired by [SeisComP](https://www
 
 ### Optional
 - OpenMP (for parallel processing)
+- ONNX Runtime (for ML picker with neural network models)
 
 ### Build Steps
 
@@ -88,26 +93,59 @@ sudo make install
 
 ```bash
 # Connect to IRIS SeedLink and process data
-./seisproc -s rtserve.iris.washington.edu -p 18000
+./realdetect -s rtserve.iris.washington.edu -p 18000
 
 # With custom configuration
-./seisproc -c config/seisproc.conf -S config/stations.txt -v config/velocity_model.txt
+./realdetect -c config/realdetect.conf -S config/stations.txt -v config/velocity_model.txt
 
 # Connect to local server
-./seisproc -s localhost -p 18000
+./realdetect -s localhost -p 18000
 
 # With CSS3.0 database output
-./seisproc -s localhost -p 18000 -d catalog.db
+./realdetect -s localhost -p 18000 -d catalog.db
 
 # With regional velocity models
-./seisproc -s localhost -p 18000 -V config/velocity_models -d catalog.db
+./realdetect -s localhost -p 18000 -V config/velocity_models -d catalog.db
+```
+
+### Playback Mode
+
+Process archived MiniSEED data for offline analysis:
+
+```bash
+# Playback a single MiniSEED file
+./realdetect -m data.mseed -d catalog.db
+
+# Playback all files in a directory
+./realdetect -M /path/to/miniseed/files -d catalog.db
+
+# Fast playback (as fast as possible)
+./realdetect -m data.mseed --playback-speed 0
+
+# Slower playback for debugging (0.5x real-time)
+./realdetect -m data.mseed --playback-speed 0.5
+```
+
+### ML Picker
+
+Use machine learning for phase detection:
+
+```bash
+# Use built-in ML detector
+./realdetect --picker ml -m data.mseed
+
+# Use custom ML model (ONNX format)
+./realdetect --picker ml --ml-model phasenet.onnx -m data.mseed
+
+# Use ML picker with real-time data
+./realdetect --picker ml -s localhost -p 18000
 ```
 
 ### Simulator (for testing)
 
 ```bash
 # Run synthetic event simulation
-./seissim
+./realdetect_sim
 
 # The simulator creates a test network and generates
 # synthetic seismograms with realistic P and S arrivals
@@ -116,28 +154,44 @@ sudo make install
 ### Command Line Options
 
 ```
-Usage: seisproc [options]
+Usage: realdetect [options]
 
 Options:
-  -c, --config <file>    Configuration file (default: seisproc.conf)
-  -s, --server <host>    SeedLink server host (default: localhost)
-  -p, --port <port>      SeedLink server port (default: 18000)
-  -S, --stations <file>  Station inventory file
-  -v, --velocity <file>  Velocity model file
+  -c, --config <file>      Configuration file (default: realdetect.conf)
+  -s, --server <host>      SeedLink server host (default: localhost)
+  -p, --port <port>        SeedLink server port (default: 18000)
+  -S, --stations <file>    Station inventory file
+  -v, --velocity <file>    Velocity model file
   -V, --velocity-dir <dir> Directory with regional velocity models
-  -d, --database <file>  CSS3.0 database file for output
-  -h, --help             Show this help message
+  -d, --database <file>    CSS3.0 database file for output
+  -m, --miniseed <file>    MiniSEED file for playback mode
+  -M, --miniseed-dir <dir> Directory of MiniSEED files for playback
+  --playback-speed <n>     Playback speed multiplier (default: 1.0, 0 = fast)
+  --picker <type>          Picker type: stalta, aic, ml (default: stalta)
+  --ml-model <file>        ML model file for ML picker
+  -h, --help               Show this help message
 ```
 
 ## Configuration
 
-See `config/seisproc.conf` for detailed configuration options:
+See `config/realdetect.conf` for detailed configuration options:
 
 ```ini
 [picker]
+# Picker type: stalta, aic, ml
+type = stalta
 sta_length = 0.5          # STA window (seconds)
 lta_length = 10.0         # LTA window (seconds)
 trigger_ratio = 3.5       # STA/LTA trigger threshold
+
+# ML picker settings
+ml_model_path = path/to/model.onnx
+ml_probability_threshold = 0.5
+
+[playback]
+enabled = false           # Enable playback mode
+speed = 1.0              # Playback speed (0 = fast as possible)
+file = data.mseed        # MiniSEED file to playback
 
 [locator]
 algorithm = geiger        # Location algorithm (geiger, gridsearch, octtree)
@@ -151,8 +205,8 @@ regional_models_dir = config/velocity_models
 
 [database]
 enabled = true            # Enable CSS3.0 database output
-file = seisproc_catalog.db
-author = seisproc
+file = realdetect_catalog.db
+author = realdetect
 network = XX
 auto_create_schema = true
 
@@ -225,13 +279,14 @@ The database follows the CSS3.0 standard with the following core tables:
 ## Architecture
 
 ```
-seisproc/
-├── include/seisproc/
+realdetect/
+├── include/realdetect/
 │   ├── core/           # Core data structures
 │   │   ├── types.hpp       # Basic types, GeoPoint, StreamID
 │   │   ├── waveform.hpp    # Waveform container
 │   │   ├── station.hpp     # Station/channel metadata
 │   │   ├── event.hpp       # Event/Origin/Pick structures
+│   │   ├── miniseed.hpp    # MiniSEED parser
 │   │   ├── velocity_model.hpp
 │   │   ├── regional_velocity_model.hpp  # Regional model manager
 │   │   └── config.hpp
@@ -247,6 +302,7 @@ seisproc/
 │   │   ├── picker.hpp
 │   │   ├── stalta_picker.hpp
 │   │   ├── aic_picker.hpp
+│   │   ├── ml_picker.hpp       # ML-based picker
 │   │   ├── characteristic_function.hpp
 │   │   └── filter_bank.hpp
 │   │
@@ -264,7 +320,7 @@ seisproc/
 │       └── moment_magnitude.hpp
 │
 ├── config/
-│   ├── seisproc.conf           # Main configuration
+│   ├── realdetect.conf         # Main configuration
 │   ├── velocity_model.txt      # Default velocity model
 │   └── velocity_models/        # Regional velocity models
 │       ├── velocity_models.conf
@@ -283,10 +339,10 @@ Data Flow:
   SeedLink    →   Buffer   →   Picker   →   Associator   →   Locator   →   Magnitude   →   │  CSS3.0  │
      │              │           │               │               │              │            │ Database │
   Real-time    Circular      STA/LTA        Travel-time      Geiger          ML            └──────────┘
-  MiniSEED     buffer        + AIC          clustering      inversion        Mw
-                                                 │
-                                            Regional
-                                         Velocity Model
+  MiniSEED     buffer        AIC/ML         clustering      inversion        Mw
+     │                                           │
+  Playback                                  Regional
+    Mode                                 Velocity Model
                                            Selection
 ```
 
@@ -297,6 +353,15 @@ The classic trigger algorithm computes the ratio of short-term to long-term ener
 ```
 R(t) = STA(t) / LTA(t)
 Trigger when R > threshold
+```
+
+### ML Picker
+Machine learning based phase detection using neural networks:
+```
+1. Preprocess waveform (normalize, filter)
+2. Run model inference → phase probabilities P(t), S(t)
+3. Find peaks above threshold
+4. Return picks at peak locations
 ```
 
 ### Geiger Location
@@ -333,6 +398,8 @@ where M0 = seismic moment from spectral analysis
 - Lomax et al. (2000). Probabilistic earthquake location in 3D and layered models
 - Brune (1970). Tectonic stress and the spectra of seismic shear waves
 - Havskov & Ottemoller (2010). Routine Data Processing in Earthquake Seismology
+- Ross et al. (2018). PhaseNet: A Deep-Neural-Network-Based Seismic Arrival Time Picking Method
+- Mousavi et al. (2020). EQTransformer: An Attentive Deep-Learning Model for Simultaneous Earthquake Detection and Phase Picking
 
 ## License
 

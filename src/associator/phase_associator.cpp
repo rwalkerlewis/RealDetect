@@ -1,10 +1,10 @@
-#include "seisproc/associator/phase_associator.hpp"
+#include "realdetect/associator/phase_associator.hpp"
 #include <algorithm>
 #include <set>
 #include <cmath>
 #include <iostream>
 
-namespace seisproc {
+namespace realdetect {
 
 // TravelTimeTable implementation
 
@@ -377,4 +377,4 @@ std::vector<EventPtr> NucleatorAssociator::extractEvents() {
     return events;
 }
 
-} // namespace seisproc
+} // namespace realdetect

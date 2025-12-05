@@ -1,11 +1,11 @@
-#include "seisproc/core/miniseed.hpp"
+#include "realdetect/core/miniseed.hpp"
 #include <fstream>
 #include <cstring>
 #include <iostream>
 #include <algorithm>
 #include <map>
 
-namespace seisproc {
+namespace realdetect {
 
 TimePoint MiniSeedRecord::parseTime(const uint8_t* btime) {
     // BTIME structure (10 bytes):
@@ -383,4 +383,4 @@ std::vector<WaveformPtr> MiniSeedReader::toWaveforms() const {
     return result;
 }
 
-} // namespace seisproc
+} // namespace realdetect

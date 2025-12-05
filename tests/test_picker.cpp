@@ -3,16 +3,16 @@
  */
 
 #include "test_framework.hpp"
-#include "seisproc/core/waveform.hpp"
-#include "seisproc/picker/stalta_picker.hpp"
-#include "seisproc/picker/aic_picker.hpp"
-#include "seisproc/picker/characteristic_function.hpp"
-#include "seisproc/picker/filter_bank.hpp"
+#include "realdetect/core/waveform.hpp"
+#include "realdetect/picker/stalta_picker.hpp"
+#include "realdetect/picker/aic_picker.hpp"
+#include "realdetect/picker/characteristic_function.hpp"
+#include "realdetect/picker/filter_bank.hpp"
 #include <cmath>
 #include <random>
 
-using namespace seisproc;
-using namespace seisproc::test;
+using namespace realdetect;
+using namespace realdetect::test;
 
 // Helper to create synthetic waveform with arrival
 Waveform createSyntheticWaveform(double sample_rate, double duration,

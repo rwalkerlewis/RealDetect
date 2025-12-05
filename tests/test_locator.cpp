@@ -3,16 +3,16 @@
  */
 
 #include "test_framework.hpp"
-#include "seisproc/core/station.hpp"
-#include "seisproc/core/event.hpp"
-#include "seisproc/core/velocity_model.hpp"
-#include "seisproc/locator/grid_search.hpp"
-#include "seisproc/locator/geiger.hpp"
-#include "seisproc/associator/phase_associator.hpp"
+#include "realdetect/core/station.hpp"
+#include "realdetect/core/event.hpp"
+#include "realdetect/core/velocity_model.hpp"
+#include "realdetect/locator/grid_search.hpp"
+#include "realdetect/locator/geiger.hpp"
+#include "realdetect/associator/phase_associator.hpp"
 #include <random>
 
-using namespace seisproc;
-using namespace seisproc::test;
+using namespace realdetect;
+using namespace realdetect::test;
 
 // Helper to create a network of stations
 StationInventory createTestNetwork(double center_lat, double center_lon) {

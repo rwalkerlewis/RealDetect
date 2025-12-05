@@ -1,1 +1,0 @@
-/usr/bin/c++  -Wall -Wextra -O3 CMakeFiles/seisproc.dir/src/main.cpp.o -o seisproc  libseisproc_core.a /usr/lib/x86_64-linux-gnu/libsqlite3.so -ldl 

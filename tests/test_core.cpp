@@ -3,15 +3,15 @@
  */
 
 #include "test_framework.hpp"
-#include "seisproc/core/types.hpp"
-#include "seisproc/core/waveform.hpp"
-#include "seisproc/core/station.hpp"
-#include "seisproc/core/event.hpp"
-#include "seisproc/core/velocity_model.hpp"
-#include "seisproc/core/config.hpp"
+#include "realdetect/core/types.hpp"
+#include "realdetect/core/waveform.hpp"
+#include "realdetect/core/station.hpp"
+#include "realdetect/core/event.hpp"
+#include "realdetect/core/velocity_model.hpp"
+#include "realdetect/core/config.hpp"
 
-using namespace seisproc;
-using namespace seisproc::test;
+using namespace realdetect;
+using namespace realdetect::test;
 
 // ============================================================================
 // GeoPoint Tests

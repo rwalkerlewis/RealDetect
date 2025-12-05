@@ -1,9 +1,9 @@
 /**
- * SeisProc - Real-time Seismic Event Processing System
+ * RealDetect - Real-time Seismic Event Processing System
  * 
  * Main application that:
- * 1. Connects to SeedLink servers for real-time data
- * 2. Picks phase arrivals using STA/LTA and AIC
+ * 1. Connects to SeedLink servers for real-time data OR plays back MiniSEED files
+ * 2. Picks phase arrivals using STA/LTA, AIC, or ML detectors
  * 3. Associates picks into events
  * 4. Locates events using grid search + Geiger inversion
  * 5. Calculates magnitudes (ML, Mw)
@@ -16,23 +16,27 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <filesystem>
+#include <algorithm>
 
-#include "seisproc/core/types.hpp"
-#include "seisproc/core/config.hpp"
-#include "seisproc/core/station.hpp"
-#include "seisproc/core/velocity_model.hpp"
-#include "seisproc/core/regional_velocity_model.hpp"
-#include "seisproc/database/css30_database.hpp"
-#include "seisproc/seedlink/seedlink_client.hpp"
-#include "seisproc/picker/stalta_picker.hpp"
-#include "seisproc/picker/aic_picker.hpp"
-#include "seisproc/associator/phase_associator.hpp"
-#include "seisproc/locator/grid_search.hpp"
-#include "seisproc/locator/geiger.hpp"
-#include "seisproc/magnitude/local_magnitude.hpp"
-#include "seisproc/magnitude/moment_magnitude.hpp"
+#include "realdetect/core/types.hpp"
+#include "realdetect/core/config.hpp"
+#include "realdetect/core/station.hpp"
+#include "realdetect/core/velocity_model.hpp"
+#include "realdetect/core/regional_velocity_model.hpp"
+#include "realdetect/core/miniseed.hpp"
+#include "realdetect/database/css30_database.hpp"
+#include "realdetect/seedlink/seedlink_client.hpp"
+#include "realdetect/picker/stalta_picker.hpp"
+#include "realdetect/picker/aic_picker.hpp"
+#include "realdetect/picker/ml_picker.hpp"
+#include "realdetect/associator/phase_associator.hpp"
+#include "realdetect/locator/grid_search.hpp"
+#include "realdetect/locator/geiger.hpp"
+#include "realdetect/magnitude/local_magnitude.hpp"
+#include "realdetect/magnitude/moment_magnitude.hpp"
 
-using namespace seisproc;
+using namespace realdetect;
 
 // Global shutdown flag
 std::atomic<bool> g_running(true);
@@ -45,35 +49,64 @@ void signalHandler(int signum) {
 void printUsage(const char* progname) {
     std::cout << "Usage: " << progname << " [options]\n\n";
     std::cout << "Options:\n";
-    std::cout << "  -c, --config <file>    Configuration file (default: seisproc.conf)\n";
+    std::cout << "  -c, --config <file>    Configuration file (default: realdetect.conf)\n";
     std::cout << "  -s, --server <host>    SeedLink server host (default: localhost)\n";
     std::cout << "  -p, --port <port>      SeedLink server port (default: 18000)\n";
     std::cout << "  -S, --stations <file>  Station inventory file\n";
     std::cout << "  -v, --velocity <file>  Velocity model file\n";
     std::cout << "  -V, --velocity-dir <dir> Directory with regional velocity models\n";
     std::cout << "  -d, --database <file>  CSS3.0 database file for output\n";
+    std::cout << "  -m, --miniseed <file>  MiniSEED file for playback mode\n";
+    std::cout << "  -M, --miniseed-dir <dir> Directory of MiniSEED files for playback\n";
+    std::cout << "  --playback-speed <n>   Playback speed multiplier (default: 1.0, 0 = fast as possible)\n";
+    std::cout << "  --picker <type>        Picker type: stalta, aic, ml (default: stalta)\n";
+    std::cout << "  --ml-model <file>      ML model file for ML picker\n";
     std::cout << "  -h, --help             Show this help message\n";
+    std::cout << "\n";
+    std::cout << "Modes:\n";
+    std::cout << "  Real-time:  Connect to SeedLink server for live data streaming\n";
+    std::cout << "  Playback:   Process MiniSEED files (use -m or -M options)\n";
+    std::cout << "\n";
+    std::cout << "Picker Types:\n";
+    std::cout << "  stalta      STA/LTA detector with AIC refinement (default)\n";
+    std::cout << "  aic         AIC picker only\n";
+    std::cout << "  ml          Machine learning detector (requires model file)\n";
     std::cout << "\n";
     std::cout << "Database Output:\n";
     std::cout << "  Events are stored in CSS3.0 schema format (SQLite database)\n";
     std::cout << "  Tables: event, origin, origerr, arrival, assoc, netmag, stamag\n";
     std::cout << "\n";
-    std::cout << "Regional Velocity Models:\n";
-    std::cout << "  Place .vel files with .bounds files in velocity model directory\n";
-    std::cout << "  Or create velocity_models.conf for detailed configuration\n";
-    std::cout << "\n";
-    std::cout << "Example:\n";
+    std::cout << "Examples:\n";
+    std::cout << "  # Real-time processing\n";
     std::cout << "  " << progname << " -s rtserve.iris.washington.edu -p 18000 -d catalog.db\n";
+    std::cout << "\n";
+    std::cout << "  # Playback mode with MiniSEED file\n";
+    std::cout << "  " << progname << " -m data.mseed -d catalog.db\n";
+    std::cout << "\n";
+    std::cout << "  # ML picker with custom model\n";
+    std::cout << "  " << progname << " --picker ml --ml-model phasenet.onnx -m data.mseed\n";
 }
 
 /**
- * SeisProc Application
+ * PickerType - Available picker algorithms
  */
-class SeisProc {
+enum class PickerType {
+    STALTA,
+    AIC,
+    ML
+};
+
+/**
+ * RealDetect Application
+ */
+class RealDetect {
 public:
-    SeisProc() 
+    RealDetect() 
         : db_enabled_(false)
         , use_regional_models_(false)
+        , playback_mode_(false)
+        , playback_speed_(1.0)
+        , picker_type_(PickerType::STALTA)
         , picker_(std::make_shared<STALTAPicker>())
         , locator_(std::make_shared<GeigerLocator>())
         , ml_calculator_(std::make_shared<LocalMagnitude>())
@@ -97,6 +130,33 @@ public:
         associator_.setMinStations(3);
         associator_.setMinPhases(4);
     }
+    
+    void setPickerType(PickerType type, const std::string& ml_model_path = "") {
+        picker_type_ = type;
+        switch (type) {
+            case PickerType::STALTA:
+                picker_ = std::make_shared<STALTAPicker>();
+                picker_->setParameter("sta_length", 0.5);
+                picker_->setParameter("lta_length", 10.0);
+                picker_->setParameter("trigger_ratio", 3.5);
+                break;
+            case PickerType::AIC:
+                picker_ = std::make_shared<AICPicker>();
+                break;
+            case PickerType::ML:
+                {
+                    auto ml_picker = std::make_shared<MLPicker>();
+                    if (!ml_model_path.empty()) {
+                        ml_picker->loadModel(ml_model_path);
+                    }
+                    picker_ = ml_picker;
+                }
+                break;
+        }
+    }
+    
+    void setPlaybackMode(bool enabled) { playback_mode_ = enabled; }
+    void setPlaybackSpeed(double speed) { playback_speed_ = speed; }
     
     bool loadConfig(const std::string& filename) {
         if (!config_.loadFromFile(filename)) {
@@ -157,9 +217,9 @@ public:
         
         // Database configuration
         if (config_.getBool("database.enabled", false)) {
-            std::string db_file = config_.getString("database.file", "seisproc_catalog.db");
+            std::string db_file = config_.getString("database.file", "realdetect_catalog.db");
             if (initDatabase(db_file)) {
-                db_author_ = config_.getString("database.author", "seisproc");
+                db_author_ = config_.getString("database.author", "realdetect");
                 db_network_ = config_.getString("database.network", "XX");
                 database_.setAuthor(db_author_);
             }
@@ -256,6 +316,10 @@ public:
     }
     
     bool start() {
+        if (playback_mode_) {
+            return startPlayback();
+        }
+        
         if (!client_.startStreaming()) {
             std::cerr << "Failed to start streaming" << std::endl;
             return false;
@@ -279,8 +343,145 @@ public:
         return true;
     }
     
+    bool startPlayback() {
+        std::cout << "Starting playback mode" << std::endl;
+        
+        if (playback_waveforms_.empty()) {
+            std::cerr << "No waveforms loaded for playback" << std::endl;
+            return false;
+        }
+        
+        // Sort waveforms by start time
+        std::vector<WaveformPtr> sorted_waveforms = playback_waveforms_;
+        std::sort(sorted_waveforms.begin(), sorted_waveforms.end(),
+            [](const WaveformPtr& a, const WaveformPtr& b) {
+                return a->startTime() < b->startTime();
+            });
+        
+        TimePoint playback_start = sorted_waveforms.front()->startTime();
+        auto real_start = std::chrono::steady_clock::now();
+        
+        std::cout << "Playback starting from " << sorted_waveforms.size() 
+                  << " waveforms" << std::endl;
+        
+        size_t processed = 0;
+        for (const auto& waveform : sorted_waveforms) {
+            if (!g_running) break;
+            
+            // Simulate timing if playback_speed > 0
+            if (playback_speed_ > 0) {
+                auto elapsed_data = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    waveform->startTime() - playback_start);
+                auto target_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    elapsed_data / playback_speed_);
+                auto real_elapsed = std::chrono::steady_clock::now() - real_start;
+                
+                if (target_elapsed > real_elapsed) {
+                    std::this_thread::sleep_for(target_elapsed - real_elapsed);
+                }
+            }
+            
+            // Process the waveform
+            processWaveform(waveform);
+            processed++;
+            
+            // Check for events periodically
+            if (processed % 10 == 0) {
+                auto events = associator_.process();
+                for (auto& event : events) {
+                    processEvent(event);
+                }
+            }
+        }
+        
+        // Final event processing
+        auto events = associator_.process();
+        for (auto& event : events) {
+            processEvent(event);
+        }
+        
+        std::cout << "Playback complete. Processed " << processed << " waveforms." << std::endl;
+        return true;
+    }
+    
     void stop() {
         client_.disconnect();
+    }
+    
+    // Load MiniSEED file for playback
+    bool loadMiniSeedFile(const std::string& filename) {
+        MiniSeedReader reader;
+        if (!reader.open(filename)) {
+            std::cerr << "Failed to open MiniSEED file: " << filename << std::endl;
+            return false;
+        }
+        
+        auto waveforms = reader.toWaveforms();
+        for (auto& wf : waveforms) {
+            playback_waveforms_.push_back(wf);
+        }
+        
+        std::cout << "Loaded " << waveforms.size() << " waveforms from " << filename << std::endl;
+        playback_mode_ = true;
+        return true;
+    }
+    
+    // Load MiniSEED data from memory for playback
+    bool loadMiniSeedData(const uint8_t* data, size_t length) {
+        MiniSeedReader reader;
+        if (!reader.parse(data, length)) {
+            std::cerr << "Failed to parse MiniSEED data" << std::endl;
+            return false;
+        }
+        
+        auto waveforms = reader.toWaveforms();
+        for (auto& wf : waveforms) {
+            playback_waveforms_.push_back(wf);
+        }
+        
+        std::cout << "Loaded " << waveforms.size() << " waveforms from memory block" << std::endl;
+        playback_mode_ = true;
+        return true;
+    }
+    
+    // Load MiniSEED files from directory
+    bool loadMiniSeedDirectory(const std::string& directory) {
+        std::cout << "Loading MiniSEED files from directory: " << directory << std::endl;
+        
+        // Use filesystem to iterate directory
+        size_t total_waveforms = 0;
+        for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+            if (entry.is_regular_file()) {
+                std::string ext = entry.path().extension().string();
+                // Check for common miniseed extensions
+                if (ext == ".mseed" || ext == ".miniseed" || ext == ".ms" || ext == ".seed") {
+                    if (loadMiniSeedFile(entry.path().string())) {
+                        total_waveforms += playback_waveforms_.size();
+                    }
+                }
+            }
+        }
+        
+        if (total_waveforms == 0) {
+            std::cerr << "No MiniSEED files found in directory" << std::endl;
+            return false;
+        }
+        
+        playback_mode_ = true;
+        return true;
+    }
+    
+public:
+    bool loadPlaybackFile(const std::string& filename) {
+        return loadMiniSeedFile(filename);
+    }
+    
+    bool loadPlaybackDirectory(const std::string& directory) {
+        return loadMiniSeedDirectory(directory);
+    }
+    
+    bool loadPlaybackData(const uint8_t* data, size_t length) {
+        return loadMiniSeedData(data, length);
     }
     
 private:
@@ -298,7 +499,14 @@ private:
     std::string db_network_;
     bool use_regional_models_;
     
-    std::shared_ptr<STALTAPicker> picker_;
+    // Playback mode
+    bool playback_mode_;
+    double playback_speed_;
+    std::vector<WaveformPtr> playback_waveforms_;
+    
+    // Picker
+    PickerType picker_type_;
+    std::shared_ptr<BasePicker> picker_;
     PhaseAssociator associator_;
     std::shared_ptr<GeigerLocator> locator_;
     std::shared_ptr<LocalMagnitude> ml_calculator_;
@@ -322,7 +530,7 @@ private:
             pick->snr = pick_result.snr;
             pick->amplitude = pick_result.amplitude;
             pick->is_automatic = true;
-            pick->method = "STA/LTA";
+            pick->method = picker_->name();
             
             // Quality based on SNR
             if (pick_result.snr >= 10) {
@@ -461,13 +669,18 @@ int main(int argc, char* argv[]) {
     signal(SIGTERM, signalHandler);
     
     // Parse command line arguments
-    std::string config_file = "seisproc.conf";
+    std::string config_file = "realdetect.conf";
     std::string server_host = "localhost";
     int server_port = 18000;
     std::string stations_file;
     std::string velocity_file;
     std::string velocity_dir;
     std::string database_file;
+    std::string miniseed_file;
+    std::string miniseed_dir;
+    double playback_speed = 1.0;
+    std::string picker_type = "stalta";
+    std::string ml_model_file;
     
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -489,15 +702,44 @@ int main(int argc, char* argv[]) {
             velocity_dir = argv[++i];
         } else if ((arg == "-d" || arg == "--database") && i + 1 < argc) {
             database_file = argv[++i];
+        } else if ((arg == "-m" || arg == "--miniseed") && i + 1 < argc) {
+            miniseed_file = argv[++i];
+        } else if ((arg == "-M" || arg == "--miniseed-dir") && i + 1 < argc) {
+            miniseed_dir = argv[++i];
+        } else if (arg == "--playback-speed" && i + 1 < argc) {
+            playback_speed = std::stod(argv[++i]);
+        } else if (arg == "--picker" && i + 1 < argc) {
+            picker_type = argv[++i];
+        } else if (arg == "--ml-model" && i + 1 < argc) {
+            ml_model_file = argv[++i];
         }
     }
     
-    std::cout << "=======================================\n";
-    std::cout << "SeisProc - Real-time Seismic Processing\n";
+    std::cout << "==========================================\n";
+    std::cout << "RealDetect - Real-time Seismic Processing\n";
     std::cout << "  with CSS3.0 Database Support\n";
-    std::cout << "=======================================\n\n";
+    std::cout << "==========================================\n\n";
     
-    SeisProc app;
+    RealDetect app;
+    
+    // Set picker type
+    if (picker_type == "stalta") {
+        app.setPickerType(PickerType::STALTA);
+        std::cout << "Using STA/LTA picker" << std::endl;
+    } else if (picker_type == "aic") {
+        app.setPickerType(PickerType::AIC);
+        std::cout << "Using AIC picker" << std::endl;
+    } else if (picker_type == "ml") {
+        app.setPickerType(PickerType::ML, ml_model_file);
+        std::cout << "Using ML picker";
+        if (!ml_model_file.empty()) {
+            std::cout << " with model: " << ml_model_file;
+        }
+        std::cout << std::endl;
+    } else {
+        std::cerr << "Unknown picker type: " << picker_type << std::endl;
+        return 1;
+    }
     
     // Load configuration
     app.loadConfig(config_file);
@@ -522,17 +764,38 @@ int main(int argc, char* argv[]) {
         app.openDatabase(database_file);
     }
     
-    // Connect to server
-    if (!app.connectToServer(server_host, server_port)) {
-        return 1;
-    }
+    // Check for playback mode
+    bool playback_mode = !miniseed_file.empty() || !miniseed_dir.empty();
     
-    // Add some default streams (example: IRIS network)
-    app.addStream("IU", "ANMO", "BH?");
-    app.addStream("IU", "CCM", "BH?");
-    app.addStream("IU", "HRV", "BH?");
-    app.addStream("IU", "SSPA", "BH?");
-    app.addStream("US", "ACSO", "BH?");
+    if (playback_mode) {
+        app.setPlaybackSpeed(playback_speed);
+        
+        if (!miniseed_file.empty()) {
+            if (!app.loadPlaybackFile(miniseed_file)) {
+                return 1;
+            }
+        }
+        
+        if (!miniseed_dir.empty()) {
+            if (!app.loadPlaybackDirectory(miniseed_dir)) {
+                return 1;
+            }
+        }
+        
+        std::cout << "Playback mode enabled (speed: " << playback_speed << "x)" << std::endl;
+    } else {
+        // Real-time mode - connect to server
+        if (!app.connectToServer(server_host, server_port)) {
+            return 1;
+        }
+        
+        // Add some default streams (example: IRIS network)
+        app.addStream("IU", "ANMO", "BH?");
+        app.addStream("IU", "CCM", "BH?");
+        app.addStream("IU", "HRV", "BH?");
+        app.addStream("IU", "SSPA", "BH?");
+        app.addStream("US", "ACSO", "BH?");
+    }
     
     // Start processing
     if (!app.start()) {
@@ -541,6 +804,6 @@ int main(int argc, char* argv[]) {
     
     app.stop();
     
-    std::cout << "SeisProc shutdown complete" << std::endl;
+    std::cout << "RealDetect shutdown complete" << std::endl;
     return 0;
 }

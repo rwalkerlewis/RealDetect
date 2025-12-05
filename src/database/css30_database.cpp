@@ -4,7 +4,7 @@
  * SQLite-based implementation of the CSS3.0 seismic data schema.
  */
 
-#include "seisproc/database/css30_database.hpp"
+#include "realdetect/database/css30_database.hpp"
 #include <sqlite3.h>
 #include <ctime>
 #include <sstream>
@@ -14,7 +14,7 @@
 #include <chrono>
 #include <cmath>
 
-namespace seisproc {
+namespace realdetect {
 
 CSS30Database::CSS30Database()
     : db_(nullptr)
@@ -1118,4 +1118,4 @@ void CSS30Database::setError(const std::string& context) {
     std::cerr << "CSS30Database error: " << last_error_ << std::endl;
 }
 
-} // namespace seisproc
+} // namespace realdetect

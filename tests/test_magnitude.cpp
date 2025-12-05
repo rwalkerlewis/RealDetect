@@ -3,16 +3,16 @@
  */
 
 #include "test_framework.hpp"
-#include "seisproc/core/waveform.hpp"
-#include "seisproc/core/station.hpp"
-#include "seisproc/core/event.hpp"
-#include "seisproc/magnitude/local_magnitude.hpp"
-#include "seisproc/magnitude/moment_magnitude.hpp"
+#include "realdetect/core/waveform.hpp"
+#include "realdetect/core/station.hpp"
+#include "realdetect/core/event.hpp"
+#include "realdetect/magnitude/local_magnitude.hpp"
+#include "realdetect/magnitude/moment_magnitude.hpp"
 #include <random>
 #include <cmath>
 
-using namespace seisproc;
-using namespace seisproc::test;
+using namespace realdetect;
+using namespace realdetect::test;
 
 // Helper to create synthetic waveform for magnitude testing
 WaveformPtr createMagnitudeWaveform(double sample_rate, double duration,
