@@ -123,6 +123,10 @@ bool CSS30Database::createSchema() {
     executeSQL("INSERT OR REPLACE INTO css30_meta VALUES ('schema_version', '3.0')");
     executeSQL("INSERT OR REPLACE INTO css30_meta VALUES ('created', datetime('now'))");
     
+    // Re-prepare statements now that tables exist
+    finalizeStatements();
+    prepareStatements();
+    
     return true;
 }
 
@@ -971,88 +975,77 @@ bool CSS30Database::initializeSequences() {
 }
 
 bool CSS30Database::prepareStatements() {
-    int rc;
+    // Prepare statements for tables that exist - silently skip if table doesn't exist yet
+    // Statements will be NULL if tables don't exist, check before use
     
     // Event insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO event (evid, evname, prefor, auth, lddate) VALUES (?, ?, ?, ?, ?)",
         -1, &stmt_insert_event_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Origin insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO origin (lat, lon, depth, time, orid, evid, jdate, nass, ndef, "
         "etype, dtype, algorithm, auth, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_origin_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Origerr insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO origerr (orid, sxx, syy, szz, stt, sdobs, smajax, sminax, "
         "strike, sdepth, stime, conf, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_origerr_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Arrival insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO arrival (sta, time, arid, jdate, chan, iphase, deltim, amp, "
         "per, snr, qual, auth, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_arrival_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Assoc insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO assoc (arid, orid, sta, phase, delta, seaz, esaz, timeres, "
         "timedef, wgt, vmodel, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_assoc_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Netmag insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO netmag (magid, net, orid, evid, magtype, nsta, magnitude, "
         "uncertainty, auth, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_netmag_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Stamag insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO stamag (magid, sta, orid, evid, delta, magtype, magnitude, "
         "auth, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_stamag_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Site insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT OR REPLACE INTO site (sta, ondate, offdate, lat, lon, elev, staname, "
         "statype, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_site_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Sitechan insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT OR REPLACE INTO sitechan (sta, chan, ondate, chanid, offdate, hang, "
         "vang, descrip, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_sitechan_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Affiliation insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT OR REPLACE INTO affiliation (net, sta, lddate) VALUES (?, ?, ?)",
         -1, &stmt_insert_affiliation_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Wfdisc insert
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "INSERT INTO wfdisc (sta, chan, time, wfid, jdate, endtime, nsamp, samprate, "
         "dir, dfile, lddate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         -1, &stmt_insert_wfdisc_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     // Update prefor
-    rc = sqlite3_prepare_v2(db_,
+    sqlite3_prepare_v2(db_,
         "UPDATE event SET prefor = ? WHERE evid = ?",
         -1, &stmt_update_prefor_, nullptr);
-    if (rc != SQLITE_OK) return false;
     
     return true;
 }

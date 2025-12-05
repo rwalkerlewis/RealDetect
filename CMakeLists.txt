@@ -166,28 +166,63 @@ if(BUILD_TESTS)
         tests/test_locator.cpp
         tests/test_magnitude.cpp
         tests/test_benchmark.cpp
+        tests/test_database.cpp
+        tests/test_miniseed.cpp
+        tests/test_associator.cpp
+        tests/test_regional_velocity.cpp
+        tests/test_integration.cpp
     )
     
     add_executable(realdetect_tests ${TEST_SOURCES})
     target_include_directories(realdetect_tests PRIVATE ${CMAKE_SOURCE_DIR}/tests)
     target_link_libraries(realdetect_tests realdetect_core)
     
-    # Add test target
+    # Add test targets for CTest
     add_test(NAME unit_tests COMMAND realdetect_tests)
+    add_test(NAME core_tests COMMAND realdetect_tests GeoPoint StreamID Waveform Station Config)
+    add_test(NAME picker_tests COMMAND realdetect_tests STALTAPicker AICPicker CharacteristicFunction)
+    add_test(NAME locator_tests COMMAND realdetect_tests TravelTimeTable GridSearchLocator GeigerLocator)
+    add_test(NAME magnitude_tests COMMAND realdetect_tests LocalMagnitude MomentMagnitude)
+    add_test(NAME database_tests COMMAND realdetect_tests CSS30Database CSS30Writer)
+    add_test(NAME associator_tests COMMAND realdetect_tests PhaseAssociator NucleatorAssociator)
+    add_test(NAME regional_velocity_tests COMMAND realdetect_tests GeographicBounds RegionalVelocityModel VelocityModelManager)
+    add_test(NAME integration_tests COMMAND realdetect_tests Integration)
+    add_test(NAME benchmark_tests COMMAND realdetect_tests BenchmarkPipeline BenchmarkPerformance BenchmarkAccuracy)
     
     # Add convenience targets for running tests
     add_custom_target(run_tests
         COMMAND realdetect_tests
         DEPENDS realdetect_tests
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Running unit tests..."
+        COMMENT "Running all tests..."
     )
     
     # Run specific test suites
+    add_custom_target(run_unit_tests
+        COMMAND realdetect_tests GeoPoint StreamID Waveform Station Config STALTAPicker AICPicker
+        DEPENDS realdetect_tests
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running unit tests..."
+    )
+    
+    add_custom_target(run_integration_tests
+        COMMAND realdetect_tests Integration
+        DEPENDS realdetect_tests
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running integration tests..."
+    )
+    
     add_custom_target(run_benchmark
         COMMAND realdetect_tests BenchmarkPipeline BenchmarkPerformance BenchmarkAccuracy
         DEPENDS realdetect_tests
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running benchmark tests..."
+    )
+    
+    add_custom_target(run_database_tests
+        COMMAND realdetect_tests CSS30Database CSS30Writer
+        DEPENDS realdetect_tests
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running database tests..."
     )
 endif()

@@ -1,0 +1,252 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop, 'cursor/**' ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-and-test:
+    name: Build and Test (${{ matrix.os }}, ${{ matrix.compiler }})
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc
+          - os: ubuntu-22.04
+            compiler: clang
+          - os: ubuntu-20.04
+            compiler: gcc
+            
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies (Ubuntu)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          sudo apt-get install -y clang
+        fi
+          
+    - name: Configure CMake
+      run: |
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          export CC=clang
+          export CXX=clang++
+        else
+          export CC=gcc
+          export CXX=g++
+        fi
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DBUILD_TESTS=ON
+          
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j$(nproc)
+      
+    - name: Run unit tests
+      working-directory: ${{github.workspace}}/build
+      run: |
+        ./realdetect_tests
+        
+    - name: Run CTest
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev
+          
+    - name: Configure and Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
+        cmake --build build -j$(nproc)
+        
+    - name: Run Core Tests
+      working-directory: build
+      run: ./realdetect_tests GeoPoint StreamID Waveform Station Config
+      
+    - name: Run Picker Tests
+      working-directory: build
+      run: ./realdetect_tests STALTAPicker AICPicker CharacteristicFunction IIRFilter FFT FilterBank
+      
+    - name: Run Locator Tests
+      working-directory: build
+      run: ./realdetect_tests TravelTimeTable GridSearchLocator GeigerLocator LocatorFactory
+      
+    - name: Run Magnitude Tests
+      working-directory: build
+      run: ./realdetect_tests LocalMagnitude MomentMagnitude MagnitudeFactory
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev
+          
+    - name: Configure and Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+        cmake --build build -j$(nproc)
+        
+    - name: Run Integration Tests
+      working-directory: build
+      run: ./realdetect_tests Integration
+      timeout-minutes: 10
+
+  benchmark-tests:
+    name: Benchmark Tests
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev
+          
+    - name: Configure and Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+        cmake --build build -j$(nproc)
+        
+    - name: Run Benchmark Tests
+      working-directory: build
+      run: ./realdetect_tests BenchmarkPipeline BenchmarkPerformance BenchmarkAccuracy
+      timeout-minutes: 15
+
+  database-tests:
+    name: Database Tests
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev
+          
+    - name: Configure and Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
+        cmake --build build -j$(nproc)
+        
+    - name: Run Database Tests
+      working-directory: build
+      run: ./realdetect_tests CSS30Database CSS30Writer
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev \
+          cppcheck
+          
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=warning,style,performance \
+          --suppress=missingIncludeSystem \
+          --error-exitcode=0 \
+          -I include \
+          src/ tests/
+
+  build-executables:
+    name: Build All Executables
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          build-essential \
+          libeigen3-dev \
+          libsqlite3-dev
+          
+    - name: Configure and Build
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+        cmake --build build -j$(nproc)
+        
+    - name: List built artifacts
+      run: |
+        ls -la build/realdetect
+        ls -la build/realdetect_sim
+        ls -la build/realdetect_tests
+        
+    - name: Test main executable
+      run: |
+        build/realdetect --help || true
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: realdetect-linux-x86_64
+        path: |
+          build/realdetect
+          build/realdetect_sim
+          build/realdetect_tests
