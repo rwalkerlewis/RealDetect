@@ -1,10 +1,10 @@
-Start testing: Dec 05 02:01 UTC
+Start testing: Dec 05 02:17 UTC
 ----------------------------------------------------------
 1/10 Testing: unit_tests
 1/10 Test: unit_tests
 Command: "/workspace/build/realdetect_tests"
 Directory: /workspace/build
-"unit_tests" start time: Dec 05 02:01 UTC
+"unit_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -15,21 +15,21 @@ Output:
 
 
 === AICPicker ===
-  ✓ ComputeAIC (0.02ms)
+  ✓ ComputeAIC (0.04ms)
   ✓ FindAICMinimum (0.00ms)
-  ✓ RefinePick (0.01ms)
+  ✓ RefinePick (0.02ms)
 
 === AssocTravelTime ===
-  ✓ Initialize (0.31ms)
-  ✓ GetTimeP (0.21ms)
-  ✓ GetTimeS (0.20ms)
-  ✓ TimeIncreaseWithDistance (0.21ms)
+  ✓ Initialize (0.58ms)
+  ✓ GetTimeP (0.20ms)
+  ✓ GetTimeS (0.21ms)
+  ✓ TimeIncreaseWithDistance (0.20ms)
   ✓ TimeIncreaseWithDepth (0.20ms)
-  ✓ Derivatives (0.20ms)
+  ✓ Derivatives (0.21ms)
 
 === AssociationCandidate ===
   ✓ DefaultConstructor (0.00ms)
-  ✓ AddPick (0.00ms)
+  ✓ AddPick (0.01ms)
 
 === BenchmarkAccuracy ===
     Location error vs pick noise:
@@ -38,52 +38,52 @@ Output:
       Noise=0.20s -> Error=8.11 km
       Noise=0.50s -> Error=0.38 km
       Noise=1.00s -> Error=22.17 km
-  ✓ LocationVsNoise (7.56ms)
+  ✓ LocationVsNoise (8.50ms)
     Location error vs station count:
       Stations=3 -> Error=0.00 km
       Stations=4 -> Error=0.00 km
       Stations=6 -> Error=0.00 km
       Stations=8 -> Error=0.00 km
       Stations=12 -> Error=0.00 km
-  ✓ LocationVsStationCount (6.99ms)
+  ✓ LocationVsStationCount (7.06ms)
 
 === BenchmarkPerformance ===
-    Picker processed 10 min in 0.80 ms
-  ✓ PickerSpeed (1.60ms)
-    Geiger located in 0.13 ms (20 iterations)
-  ✓ LocatorSpeed (1.60ms)
-    Grid search completed in 203.14 ms
-  ✓ GridSearchSpeed (204.52ms)
+    Picker processed 10 min in 1.27 ms
+  ✓ PickerSpeed (2.06ms)
+    Geiger located in 0.16 ms (20 iterations)
+  ✓ LocatorSpeed (1.80ms)
+    Grid search completed in 203.75 ms
+  ✓ GridSearchSpeed (205.20ms)
 
 === BenchmarkPipeline ===
-  ✓ SmallLocalEvent (325.00ms)
-  ✓ ModerateRegionalEvent (720.50ms)
-  ✓ NorthridgeScenario (447.61ms)
+  ✓ SmallLocalEvent (323.42ms)
+  ✓ ModerateRegionalEvent (711.92ms)
+  ✓ NorthridgeScenario (447.06ms)
 
 === BodyWaveMagnitude ===
-  ✓ DefaultParameters (0.00ms)
+  ✓ DefaultParameters (0.01ms)
   ✓ SetParameters (0.00ms)
 
 === CSS30Database ===
-  ✓ CreateAndOpen (3.35ms)
-  ✓ CreateSchema (11.93ms)
-  ✓ SchemaVersion (12.75ms)
+  ✓ CreateAndOpen (5.44ms)
+  ✓ CreateSchema (15.47ms)
+  ✓ SchemaVersion (15.21ms)
   ✓ SetAuthor (0.00ms)
-  ✓ StoreEvent (13.49ms)
-  ✓ StoreOrigin (13.96ms)
-  ✓ StoreCompleteEvent (11.13ms)
-  ✓ StoreSite (12.35ms)
-  ✓ StoreInventory (13.53ms)
-  ✓ QueryEvents (12.77ms)
-  ✓ QueryOrigins (12.41ms)
-  ✓ Transaction (12.55ms)
-  ✓ TransactionRollback (10.73ms)
-  ✓ Statistics (11.62ms)
+  ✓ StoreEvent (9.30ms)
+  ✓ StoreOrigin (10.49ms)
+  ✓ StoreCompleteEvent (13.21ms)
+  ✓ StoreSite (9.36ms)
+  ✓ StoreInventory (9.51ms)
+  ✓ QueryEvents (11.95ms)
+  ✓ QueryOrigins (10.28ms)
+  ✓ Transaction (11.71ms)
+  ✓ TransactionRollback (10.58ms)
+  ✓ Statistics (11.14ms)
 
 === CSS30Writer ===
-  ✓ WriteEvent (10.53ms)
-  ✓ WriteEvents (12.27ms)
-  ✓ WriteInventory (9.62ms)
+  ✓ WriteEvent (11.63ms)
+  ✓ WriteEvents (7.91ms)
+  ✓ WriteInventory (9.44ms)
 
 === CharacteristicFunction ===
   ✓ Envelope (0.06ms)
@@ -109,7 +109,7 @@ Output:
 === FFT ===
   ✓ ForwardInverse (0.00ms)
   ✓ PowerSpectrum (0.01ms)
-  ✓ DominantFrequency (0.02ms)
+  ✓ DominantFrequency (0.01ms)
   ✓ NextPow2 (0.00ms)
 
 === FilterBank ===
@@ -118,13 +118,13 @@ Output:
   ✓ Filter (0.05ms)
 
 === GeigerLocator ===
-  ✓ DefaultParameters (1.19ms)
-  ✓ SetParameters (0.85ms)
-  ✓ LocatePerfectData (778.23ms)
-  ✓ LocateWithNoise (1.56ms)
-  ✓ Relocate (777.78ms)
-  ✓ FixedDepth (1.56ms)
-  ✓ RMSImprovement (779.45ms)
+  ✓ DefaultParameters (0.86ms)
+  ✓ SetParameters (0.76ms)
+  ✓ LocatePerfectData (782.81ms)
+  ✓ LocateWithNoise (1.85ms)
+  ✓ Relocate (779.34ms)
+  ✓ FixedDepth (1.74ms)
+  ✓ RMSImprovement (776.23ms)
 
 === GeoPoint ===
   ✓ Constructor (0.00ms)
@@ -137,20 +137,20 @@ Output:
   ✓ AzimuthSouth (0.00ms)
 
 === GeographicBounds ===
-  ✓ BoundingBox (0.02ms)
+  ✓ BoundingBox (0.00ms)
   ✓ BoundingBoxWithDepth (0.00ms)
   ✓ Circle (0.00ms)
   ✓ Polygon (0.00ms)
   ✓ GetBoundingBox (0.00ms)
   ✓ ToString (0.01ms)
-  ✓ FromString (0.02ms)
+  ✓ FromString (0.04ms)
 
 === GridSearchLocator ===
-  ✓ DefaultParameters (0.83ms)
-  ✓ SetParameters (0.73ms)
-  ✓ LocatePerfectData (200.87ms)
-  ✓ LocateWithNoise (779.11ms)
-  ✓ FixedDepth (33.58ms)
+  ✓ DefaultParameters (0.77ms)
+  ✓ SetParameters (0.71ms)
+  ✓ LocatePerfectData (201.48ms)
+  ✓ LocateWithNoise (773.91ms)
+  ✓ FixedDepth (33.52ms)
 
 === IIRFilter ===
   ✓ ButterworthBandpass (0.01ms)
@@ -159,36 +159,36 @@ Output:
   ✓ FiltFiltZeroPhase (0.02ms)
 
 === Integration ===
-  ✓ FullPipelineSmallEvent (259.29ms)
-  ✓ FullPipelineModerateEvent (705.15ms)
-  ✓ EventToDatabase (536.13ms)
-  ✓ MultipleEventsToDatabase (6611.95ms)
+  ✓ FullPipelineSmallEvent (254.75ms)
+  ✓ FullPipelineModerateEvent (697.33ms)
+  ✓ EventToDatabase (532.96ms)
+  ✓ MultipleEventsToDatabase (6585.09ms)
   ✓ RegionalVelocityModelSelection (0.03ms)
-    Processed 400 picks from 10 events in 91.70 ms
-  ✓ HighVolumeProcessing (91.93ms)
-  ✓ ContinuousStreamSimulation (2182.03ms)
-  ✓ HandleMissingStations (764.70ms)
-  ✓ HandleNoisyData (668.22ms)
+    Processed 400 picks from 10 events in 90.61 ms
+  ✓ HighVolumeProcessing (90.68ms)
+  ✓ ContinuousStreamSimulation (2163.35ms)
+  ✓ HandleMissingStations (754.75ms)
+  ✓ HandleNoisyData (668.47ms)
 
 === LocalMagnitude ===
-  ✓ DefaultParameters (0.03ms)
-  ✓ SetParameters (0.00ms)
-  ✓ CalculateWithSyntheticData (0.64ms)
-  ✓ StationCorrection (0.65ms)
-  ✓ DistanceFiltering (0.60ms)
+  ✓ DefaultParameters (0.02ms)
+  ✓ SetParameters (0.01ms)
+  ✓ CalculateWithSyntheticData (0.65ms)
+  ✓ StationCorrection (0.66ms)
+  ✓ DistanceFiltering (0.59ms)
 
 === LocationQuality ===
-  ✓ ComputeGap (1.52ms)
-  ✓ PhaseCount (1.40ms)
+  ✓ ComputeGap (1.59ms)
+  ✓ PhaseCount (1.45ms)
 
 === LocatorFactory ===
-  ✓ CreateGridSearch (0.72ms)
-  ✓ CreateGeiger (0.70ms)
+  ✓ CreateGridSearch (0.73ms)
+  ✓ CreateGeiger (0.73ms)
   ✓ CreateOctTree (0.00ms)
   ✓ AvailableAlgorithms (0.00ms)
 
 === MagnitudeFactory ===
-  ✓ CreateML (0.09ms)
+  ✓ CreateML (0.01ms)
   ✓ CreateMw (0.00ms)
   ✓ CreateMb (0.00ms)
   ✓ CreateMs (0.00ms)
@@ -196,14 +196,14 @@ Output:
   ✓ AvailableTypes (0.00ms)
 
 === MagnitudeIntegration ===
-  ✓ MLConsistency (0.63ms)
-  ✓ NetworkMagnitude (0.64ms)
+  ✓ MLConsistency (0.61ms)
+  ✓ NetworkMagnitude (0.63ms)
 
 === MiniSeedReader ===
   ✓ DefaultConstructor (0.00ms)
-  ✓ EmptyFile (0.21ms)
+  ✓ EmptyFile (0.11ms)
   ✓ ParseEmptyData (0.00ms)
-  ✓ ToWaveformsEmpty (0.01ms)
+  ✓ ToWaveformsEmpty (0.00ms)
 
 === MiniSeedRecord ===
   ✓ DefaultConstructor (0.00ms)
@@ -216,48 +216,48 @@ Output:
   ✓ ToWaveform (0.01ms)
   ✓ EncodingTypes (0.00ms)
   ✓ HeaderConstants (0.00ms)
-  ✓ SyntheticData (0.01ms)
+  ✓ SyntheticData (0.00ms)
   ✓ MultiChannelData (0.01ms)
-  ✓ ContinuousRecords (0.01ms)
+  ✓ ContinuousRecords (0.02ms)
   ✓ VariousSampleRates (0.00ms)
-  ✓ LargeWaveform (16.11ms)
+  ✓ LargeWaveform (11.14ms)
 
 === MomentMagnitude ===
   ✓ DefaultParameters (0.00ms)
   ✓ SetParameters (0.00ms)
-  ✓ BruneSpectrum (0.67ms)
+  ✓ BruneSpectrum (0.66ms)
 
 === NucleatorAssociator ===
   ✓ DefaultConstructor (0.00ms)
   ✓ SetStations (0.01ms)
-  ✓ SetVelocityModel (0.78ms)
+  ✓ SetVelocityModel (0.77ms)
   ✓ SetGrid (0.03ms)
   ✓ SetParameters (0.00ms)
-  ✓ AddPick (0.01ms)
-  ✓ ProcessPicks (2.29ms)
+  ✓ AddPick (0.00ms)
+  ✓ ProcessPicks (2.37ms)
 
 === OctTreeLocator ===
   ✓ DefaultParameters (0.00ms)
   ✓ SetSearchBounds (0.00ms)
-  ✓ LocatePerfectData (142.56ms)
+  ✓ LocatePerfectData (143.33ms)
 
 === Origin ===
-  ✓ QualityCode (0.01ms)
+  ✓ QualityCode (0.00ms)
 
 === PhaseAssociator ===
   ✓ DefaultConstructor (0.00ms)
   ✓ SetStations (0.00ms)
-  ✓ SetVelocityModel (0.75ms)
+  ✓ SetVelocityModel (0.80ms)
   ✓ SetParameters (0.00ms)
-  ✓ AddPick (0.00ms)
+  ✓ AddPick (0.01ms)
   ✓ AssociatePerfectPicks (0.78ms)
-  ✓ AssociateNoisyPicks (0.82ms)
-  ✓ NoEventFromScatteredPicks (0.72ms)
-  ✓ EventCallback (0.77ms)
-  ✓ UnassociatedPicks (0.73ms)
-  ✓ TwoEvents (0.87ms)
-  ✓ TooFewPicks (0.72ms)
-  ✓ OnlyPWaves (0.74ms)
+  ✓ AssociateNoisyPicks (0.81ms)
+  ✓ NoEventFromScatteredPicks (0.74ms)
+  ✓ EventCallback (0.81ms)
+  ✓ UnassociatedPicks (0.74ms)
+  ✓ TwoEvents (0.89ms)
+  ✓ TooFewPicks (0.73ms)
+  ✓ OnlyPWaves (0.80ms)
 
 === PhaseType ===
   ✓ ToString (0.00ms)
@@ -274,7 +274,7 @@ Output:
   ✓ Reset (0.01ms)
 
 === RegionalVelocityModel ===
-  ✓ DefaultConstructor (0.00ms)
+  ✓ DefaultConstructor (0.01ms)
   ✓ Contains (0.00ms)
 
 === STALTAPicker ===
@@ -282,17 +282,17 @@ Output:
   ✓ SetParameters (0.00ms)
   ✓ SetParameterByName (0.00ms)
   ✓ NoPickOnNoise (0.06ms)
-  ✓ DetectClearArrival (0.09ms)
+  ✓ DetectClearArrival (0.08ms)
   ✓ CharacteristicFunction (0.07ms)
   ✓ MultiplePicks (0.14ms)
 
 === Station ===
-  ✓ Constructor (0.01ms)
+  ✓ Constructor (0.00ms)
   ✓ AddChannel (0.00ms)
   ✓ DistanceTo (0.00ms)
 
 === StationInventory ===
-  ✓ AddAndGet (0.00ms)
+  ✓ AddAndGet (0.01ms)
   ✓ StationsWithin (0.00ms)
 
 === StreamID ===
@@ -318,7 +318,7 @@ Output:
 
 === VelocityModelLoader ===
 Failed to open velocity model: /tmp/nonexistent_file.vel
-  ✓ LoadNonExistent (0.07ms)
+  ✓ LoadNonExistent (0.04ms)
 
 === VelocityModelManager ===
   ✓ DefaultConstructor (0.00ms)
@@ -326,7 +326,7 @@ Failed to open velocity model: /tmp/nonexistent_file.vel
   ✓ AddModel (0.01ms)
   ✓ AddMultipleModels (0.01ms)
   ✓ RemoveModel (0.00ms)
-  ✓ GetModelForLocation (0.00ms)
+  ✓ GetModelForLocation (0.01ms)
   ✓ GetModelForLocationCoordinates (0.00ms)
   ✓ GetModelByName (0.00ms)
   ✓ GetModelNameForLocation (0.00ms)
@@ -338,12 +338,12 @@ Failed to open velocity model: /tmp/nonexistent_file.vel
 
 === Waveform ===
   ✓ Constructor (0.00ms)
-  ✓ AppendSamples (0.00ms)
+  ✓ AppendSamples (0.01ms)
   ✓ Mean (0.00ms)
   ✓ Demean (0.00ms)
   ✓ AbsMax (0.00ms)
   ✓ Normalize (0.00ms)
-  ✓ Slice (0.01ms)
+  ✓ Slice (0.00ms)
   ✓ Duration (0.00ms)
 
 ========================================
@@ -351,13 +351,13 @@ Test Summary
 ========================================
 Passed: 221/221
 Failed: 0
-Total time: 17260.63ms
+Total time: 17162.43ms
 ========================================
 <end of output>
-Test time =  17.27 sec
+Test time =  17.17 sec
 ----------------------------------------------------------
 Test Passed.
-"unit_tests" end time: Dec 05 02:01 UTC
+"unit_tests" end time: Dec 05 02:17 UTC
 "unit_tests" time elapsed: 00:00:17
 ----------------------------------------------------------
 
@@ -365,7 +365,7 @@ Test Passed.
 2/10 Test: core_tests
 Command: "/workspace/build/realdetect_tests" "GeoPoint" "StreamID" "Waveform" "Station" "Config"
 Directory: /workspace/build
-"core_tests" start time: Dec 05 02:01 UTC
+"core_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -374,6 +374,37 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== GeoPoint ===
+  ✓ Constructor
+  ✓ DefaultConstructor
+  ✓ DistanceToSamePoint
+  ✓ DistanceToNearby
+  ✓ DistanceLondon_NewYork
+  ✓ AzimuthNorth
+  ✓ AzimuthEast
+  ✓ AzimuthSouth
+
+=== StreamID ===
+  ✓ Constructor
+  ✓ ToString
+  ✓ Equality
+  ✓ Comparison
+
+=== Waveform ===
+  ✓ Constructor
+  ✓ AppendSamples
+  ✓ Mean
+  ✓ Demean
+  ✓ AbsMax
+  ✓ Normalize
+  ✓ Slice
+  ✓ Duration
+
+=== Station ===
+  ✓ Constructor
+  ✓ AddChannel
+  ✓ DistanceTo
 
 === Config ===
   ✓ SetAndGet
@@ -383,15 +414,15 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 3/3
+Passed: 26/26
 Failed: 0
-Total time: 0.03ms
+Total time: 0.05ms
 ========================================
 <end of output>
-Test time =   0.01 sec
+Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"core_tests" end time: Dec 05 02:01 UTC
+"core_tests" end time: Dec 05 02:17 UTC
 "core_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -399,7 +430,7 @@ Test Passed.
 3/10 Test: picker_tests
 Command: "/workspace/build/realdetect_tests" "STALTAPicker" "AICPicker" "CharacteristicFunction"
 Directory: /workspace/build
-"picker_tests" start time: Dec 05 02:01 UTC
+"picker_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -408,6 +439,20 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== STALTAPicker ===
+  ✓ DefaultParameters
+  ✓ SetParameters
+  ✓ SetParameterByName
+  ✓ NoPickOnNoise
+  ✓ DetectClearArrival
+  ✓ CharacteristicFunction
+  ✓ MultiplePicks
+
+=== AICPicker ===
+  ✓ ComputeAIC
+  ✓ FindAICMinimum
+  ✓ RefinePick
 
 === CharacteristicFunction ===
   ✓ Envelope
@@ -417,15 +462,15 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 3/3
+Passed: 13/13
 Failed: 0
-Total time: 5.33ms
+Total time: 5.68ms
 ========================================
 <end of output>
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"picker_tests" end time: Dec 05 02:01 UTC
+"picker_tests" end time: Dec 05 02:17 UTC
 "picker_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -433,7 +478,7 @@ Test Passed.
 4/10 Test: locator_tests
 Command: "/workspace/build/realdetect_tests" "TravelTimeTable" "GridSearchLocator" "GeigerLocator"
 Directory: /workspace/build
-"locator_tests" start time: Dec 05 02:01 UTC
+"locator_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -442,6 +487,18 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== TravelTimeTable ===
+  ✓ Initialize
+  ✓ GetTime
+  ✓ Derivatives
+
+=== GridSearchLocator ===
+  ✓ DefaultParameters
+  ✓ SetParameters
+  ✓ LocatePerfectData
+  ✓ LocateWithNoise
+  ✓ FixedDepth
 
 === GeigerLocator ===
   ✓ DefaultParameters
@@ -455,23 +512,23 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 7/7
+Passed: 15/15
 Failed: 0
-Total time: 2334.94ms
+Total time: 3344.04ms
 ========================================
 <end of output>
-Test time =   2.34 sec
+Test time =   3.35 sec
 ----------------------------------------------------------
 Test Passed.
-"locator_tests" end time: Dec 05 02:01 UTC
-"locator_tests" time elapsed: 00:00:02
+"locator_tests" end time: Dec 05 02:17 UTC
+"locator_tests" time elapsed: 00:00:03
 ----------------------------------------------------------
 
 5/10 Testing: magnitude_tests
 5/10 Test: magnitude_tests
 Command: "/workspace/build/realdetect_tests" "LocalMagnitude" "MomentMagnitude"
 Directory: /workspace/build
-"magnitude_tests" start time: Dec 05 02:01 UTC
+"magnitude_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -480,6 +537,13 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== LocalMagnitude ===
+  ✓ DefaultParameters
+  ✓ SetParameters
+  ✓ CalculateWithSyntheticData
+  ✓ StationCorrection
+  ✓ DistanceFiltering
 
 === MomentMagnitude ===
   ✓ DefaultParameters
@@ -489,15 +553,15 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 3/3
+Passed: 8/8
 Failed: 0
-Total time: 1.01ms
+Total time: 3.01ms
 ========================================
 <end of output>
-Test time =   0.00 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"magnitude_tests" end time: Dec 05 02:01 UTC
+"magnitude_tests" end time: Dec 05 02:17 UTC
 "magnitude_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -505,7 +569,7 @@ Test Passed.
 6/10 Test: database_tests
 Command: "/workspace/build/realdetect_tests" "CSS30Database" "CSS30Writer"
 Directory: /workspace/build
-"database_tests" start time: Dec 05 02:01 UTC
+"database_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -514,6 +578,22 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== CSS30Database ===
+  ✓ CreateAndOpen
+  ✓ CreateSchema
+  ✓ SchemaVersion
+  ✓ SetAuthor
+  ✓ StoreEvent
+  ✓ StoreOrigin
+  ✓ StoreCompleteEvent
+  ✓ StoreSite
+  ✓ StoreInventory
+  ✓ QueryEvents
+  ✓ QueryOrigins
+  ✓ Transaction
+  ✓ TransactionRollback
+  ✓ Statistics
 
 === CSS30Writer ===
   ✓ WriteEvent
@@ -523,15 +603,15 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 3/3
+Passed: 17/17
 Failed: 0
-Total time: 29.36ms
+Total time: 160.28ms
 ========================================
 <end of output>
-Test time =   0.03 sec
+Test time =   0.16 sec
 ----------------------------------------------------------
 Test Passed.
-"database_tests" end time: Dec 05 02:01 UTC
+"database_tests" end time: Dec 05 02:17 UTC
 "database_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -539,7 +619,7 @@ Test Passed.
 7/10 Test: associator_tests
 Command: "/workspace/build/realdetect_tests" "PhaseAssociator" "NucleatorAssociator"
 Directory: /workspace/build
-"associator_tests" start time: Dec 05 02:01 UTC
+"associator_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -548,6 +628,21 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== PhaseAssociator ===
+  ✓ DefaultConstructor
+  ✓ SetStations
+  ✓ SetVelocityModel
+  ✓ SetParameters
+  ✓ AddPick
+  ✓ AssociatePerfectPicks
+  ✓ AssociateNoisyPicks
+  ✓ NoEventFromScatteredPicks
+  ✓ EventCallback
+  ✓ UnassociatedPicks
+  ✓ TwoEvents
+  ✓ TooFewPicks
+  ✓ OnlyPWaves
 
 === NucleatorAssociator ===
   ✓ DefaultConstructor
@@ -561,15 +656,15 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 7/7
+Passed: 20/20
 Failed: 0
-Total time: 5.67ms
+Total time: 13.15ms
 ========================================
 <end of output>
-Test time =   0.01 sec
+Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"associator_tests" end time: Dec 05 02:01 UTC
+"associator_tests" end time: Dec 05 02:17 UTC
 "associator_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -577,7 +672,7 @@ Test Passed.
 8/10 Test: regional_velocity_tests
 Command: "/workspace/build/realdetect_tests" "GeographicBounds" "RegionalVelocityModel" "VelocityModelManager"
 Directory: /workspace/build
-"regional_velocity_tests" start time: Dec 05 02:01 UTC
+"regional_velocity_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -586,6 +681,19 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== GeographicBounds ===
+  ✓ BoundingBox
+  ✓ BoundingBoxWithDepth
+  ✓ Circle
+  ✓ Polygon
+  ✓ GetBoundingBox
+  ✓ ToString
+  ✓ FromString
+
+=== RegionalVelocityModel ===
+  ✓ DefaultConstructor
+  ✓ Contains
 
 === VelocityModelManager ===
   ✓ DefaultConstructor
@@ -606,15 +714,15 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 14/14
+Passed: 23/23
 Failed: 0
-Total time: 0.04ms
+Total time: 0.10ms
 ========================================
 <end of output>
 Test time =   0.00 sec
 ----------------------------------------------------------
 Test Passed.
-"regional_velocity_tests" end time: Dec 05 02:01 UTC
+"regional_velocity_tests" end time: Dec 05 02:17 UTC
 "regional_velocity_tests" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -622,7 +730,7 @@ Test Passed.
 9/10 Test: integration_tests
 Command: "/workspace/build/realdetect_tests" "Integration"
 Directory: /workspace/build
-"integration_tests" start time: Dec 05 02:01 UTC
+"integration_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -638,7 +746,7 @@ Output:
   ✓ EventToDatabase
   ✓ MultipleEventsToDatabase
   ✓ RegionalVelocityModelSelection
-    Processed 400 picks from 10 events in 89.9604 ms
+    Processed 400 picks from 10 events in 90.306 ms
   ✓ HighVolumeProcessing
   ✓ ContinuousStreamSimulation
   ✓ HandleMissingStations
@@ -649,13 +757,13 @@ Test Summary
 ========================================
 Passed: 9/9
 Failed: 0
-Total time: 11798.59ms
+Total time: 11725.10ms
 ========================================
 <end of output>
-Test time =  11.80 sec
+Test time =  11.73 sec
 ----------------------------------------------------------
 Test Passed.
-"integration_tests" end time: Dec 05 02:01 UTC
+"integration_tests" end time: Dec 05 02:17 UTC
 "integration_tests" time elapsed: 00:00:11
 ----------------------------------------------------------
 
@@ -663,7 +771,7 @@ Test Passed.
 10/10 Test: benchmark_tests
 Command: "/workspace/build/realdetect_tests" "BenchmarkPipeline" "BenchmarkPerformance" "BenchmarkAccuracy"
 Directory: /workspace/build
-"benchmark_tests" start time: Dec 05 02:01 UTC
+"benchmark_tests" start time: Dec 05 02:17 UTC
 Output:
 ----------------------------------------------------------
 
@@ -672,6 +780,19 @@ Output:
 ║              Real-time Seismic Processing Tests              ║
 ╚══════════════════════════════════════════════════════════════╝
 
+
+=== BenchmarkPipeline ===
+  ✓ SmallLocalEvent
+  ✓ ModerateRegionalEvent
+  ✓ NorthridgeScenario
+
+=== BenchmarkPerformance ===
+    Picker processed 10 min in 0.29597 ms
+  ✓ PickerSpeed
+    Geiger located in 0.129207 ms (20 iterations)
+  ✓ LocatorSpeed
+    Grid search completed in 203.068 ms
+  ✓ GridSearchSpeed
 
 === BenchmarkAccuracy ===
     Location error vs pick noise:
@@ -692,16 +813,16 @@ Output:
 ========================================
 Test Summary
 ========================================
-Passed: 2/2
+Passed: 8/8
 Failed: 0
-Total time: 16.08ms
+Total time: 1708.87ms
 ========================================
 <end of output>
-Test time =   0.02 sec
+Test time =   1.71 sec
 ----------------------------------------------------------
 Test Passed.
-"benchmark_tests" end time: Dec 05 02:01 UTC
-"benchmark_tests" time elapsed: 00:00:00
+"benchmark_tests" end time: Dec 05 02:17 UTC
+"benchmark_tests" time elapsed: 00:00:01
 ----------------------------------------------------------
 
-End testing: Dec 05 02:01 UTC
+End testing: Dec 05 02:17 UTC

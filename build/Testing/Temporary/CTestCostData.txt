@@ -1,11 +1,11 @@
-unit_tests 1 17.269
-core_tests 1 0.00556914
-picker_tests 1 0.00794624
-locator_tests 1 2.33742
-magnitude_tests 1 0.00311609
-database_tests 1 0.0312646
-associator_tests 1 0.00762063
-regional_velocity_tests 1 0.00178122
-integration_tests 1 11.8012
-benchmark_tests 1 0.0189811
+unit_tests 2 8.58354
+core_tests 2 0.00170164
+picker_tests 2 0.00407072
+locator_tests 2 1.67612
+magnitude_tests 2 0.00415265
+database_tests 2 0.0814249
+associator_tests 2 0.00785733
+regional_velocity_tests 2 0.000993686
+integration_tests 2 5.86412
+benchmark_tests 2 0.855533
 ---
