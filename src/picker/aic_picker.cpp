@@ -1,10 +1,10 @@
-#include "seisproc/picker/aic_picker.hpp"
-#include "seisproc/picker/stalta_picker.hpp"
+#include "realdetect/picker/aic_picker.hpp"
+#include "realdetect/picker/stalta_picker.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
 
-namespace seisproc {
+namespace realdetect {
 
 AICPicker::AICPicker()
     : pre_window_(2.0)
@@ -276,4 +276,4 @@ double ARPicker::getParameter(const std::string& name) const {
     return 0;
 }
 
-} // namespace seisproc
+} // namespace realdetect

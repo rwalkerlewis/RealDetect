@@ -1,9 +1,9 @@
-#include "seisproc/magnitude/local_magnitude.hpp"
+#include "realdetect/magnitude/local_magnitude.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
 
-namespace seisproc {
+namespace realdetect {
 
 LocalMagnitude::LocalMagnitude()
     : a_(1.0)
@@ -305,4 +305,4 @@ double DurationMagnitude::findCodaDuration(const WaveformPtr& waveform,
     return (end_idx - p_idx) / waveform->sampleRate();
 }
 
-} // namespace seisproc
+} // namespace realdetect

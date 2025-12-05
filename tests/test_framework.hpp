@@ -16,7 +16,7 @@
 #include <iomanip>
 #include <map>
 
-namespace seisproc {
+namespace realdetect {
 namespace test {
 
 // Test result
@@ -174,7 +174,7 @@ struct TestRegistrar {
     if (!(cond)) { \
         std::ostringstream oss; \
         oss << "ASSERT_TRUE failed: " #cond " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -182,7 +182,7 @@ struct TestRegistrar {
     if (cond) { \
         std::ostringstream oss; \
         oss << "ASSERT_FALSE failed: " #cond " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -191,7 +191,7 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_EQ failed: " << (a) << " != " << (b) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -200,7 +200,7 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_NE failed: " << (a) << " == " << (b) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -209,7 +209,7 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_LT failed: " << (a) << " >= " << (b) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -218,7 +218,7 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_LE failed: " << (a) << " > " << (b) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -227,7 +227,7 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_GT failed: " << (a) << " <= " << (b) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -236,7 +236,7 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_GE failed: " << (a) << " < " << (b) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -246,7 +246,7 @@ struct TestRegistrar {
         oss << "ASSERT_NEAR failed: |" << (a) << " - " << (b) << "| = " \
             << std::abs((a) - (b)) << " > " << (eps) \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
@@ -257,7 +257,7 @@ struct TestRegistrar {
           std::ostringstream oss; \
           oss << "ASSERT_THROW failed: expected " #exc_type \
               << " at " << __FILE__ << ":" << __LINE__; \
-          seisproc::test::TestRegistry::instance().fail(oss.str()); \
+          realdetect::test::TestRegistry::instance().fail(oss.str()); \
           return; \
       } \
     }
@@ -267,14 +267,14 @@ struct TestRegistrar {
         std::ostringstream oss; \
         oss << "ASSERT_NO_THROW failed: " << e.what() \
             << " at " << __FILE__ << ":" << __LINE__; \
-        seisproc::test::TestRegistry::instance().fail(oss.str()); \
+        realdetect::test::TestRegistry::instance().fail(oss.str()); \
         return; \
     }
 
 // Test definition macro
 #define TEST(suite, name) \
     void test_##suite##_##name(); \
-    static seisproc::test::TestRegistrar registrar_##suite##_##name( \
+    static realdetect::test::TestRegistrar registrar_##suite##_##name( \
         #suite, #name, test_##suite##_##name); \
     void test_##suite##_##name()
 
@@ -310,4 +310,4 @@ inline void printSummary(const std::vector<TestResult>& results) {
 }
 
 } // namespace test
-} // namespace seisproc
+} // namespace realdetect

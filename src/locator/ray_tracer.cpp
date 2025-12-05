@@ -1,8 +1,8 @@
-#include "seisproc/core/velocity_model.hpp"
+#include "realdetect/core/velocity_model.hpp"
 #include <cmath>
 #include <vector>
 
-namespace seisproc {
+namespace realdetect {
 
 /**
  * Simple 1D ray tracer for travel time computation
@@ -86,4 +86,4 @@ private:
     const VelocityModel1D& model_;
 };
 
-} // namespace seisproc
+} // namespace realdetect

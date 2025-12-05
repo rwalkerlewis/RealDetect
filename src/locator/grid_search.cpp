@@ -1,11 +1,11 @@
-#include "seisproc/locator/grid_search.hpp"
+#include "realdetect/locator/grid_search.hpp"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <limits>
 #include <set>
 
-namespace seisproc {
+namespace realdetect {
 
 GridSearchLocator::GridSearchLocator()
     : h_step_(5.0)
@@ -413,4 +413,4 @@ double OctTreeLocator::computeMisfit(const Cell& cell,
     return count > 0 ? std::sqrt(sum_sq / count) : 1e10;
 }
 
-} // namespace seisproc
+} // namespace realdetect

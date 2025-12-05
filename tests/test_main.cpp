@@ -9,7 +9,7 @@
 #include <string>
 #include <cstring>
 
-using namespace seisproc::test;
+using namespace realdetect::test;
 
 // All test files are compiled together, tests are auto-registered
 

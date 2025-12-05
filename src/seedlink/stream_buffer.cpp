@@ -1,7 +1,7 @@
-#include "seisproc/seedlink/seedlink_client.hpp"
+#include "realdetect/seedlink/seedlink_client.hpp"
 #include <algorithm>
 
-namespace seisproc {
+namespace realdetect {
 
 StreamBuffer::StreamBuffer(size_t max_seconds, double sample_rate)
     : sample_rate_(sample_rate)
@@ -200,4 +200,4 @@ void MultiStreamBuffer::trimAll(TimePoint earliest) {
     }
 }
 
-} // namespace seisproc
+} // namespace realdetect

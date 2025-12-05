@@ -1,8 +1,8 @@
-#include "seisproc/core/waveform.hpp"
+#include "realdetect/core/waveform.hpp"
 #include <cmath>
 #include <algorithm>
 
-namespace seisproc {
+namespace realdetect {
 
 Waveform Waveform::resample(double new_rate) const {
     if (data_.empty() || new_rate <= 0 || new_rate == sample_rate_) {
@@ -33,4 +33,4 @@ Waveform Waveform::resample(double new_rate) const {
     return result;
 }
 
-} // namespace seisproc
+} // namespace realdetect

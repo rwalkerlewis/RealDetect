@@ -1,10 +1,10 @@
-#include "seisproc/core/event.hpp"
+#include "realdetect/core/event.hpp"
 #include <sstream>
 #include <iomanip>
 #include <random>
 #include <chrono>
 
-namespace seisproc {
+namespace realdetect {
 
 // Static member definitions
 Origin Event::dummy_origin_;
@@ -53,4 +53,4 @@ std::string Event::summary() const {
     return oss.str();
 }
 
-} // namespace seisproc
+} // namespace realdetect

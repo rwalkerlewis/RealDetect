@@ -1,4 +1,4 @@
-#include "seisproc/seedlink/seedlink_client.hpp"
+#include "realdetect/seedlink/seedlink_client.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace seisproc {
+namespace realdetect {
 
 SeedLinkClient::SeedLinkClient()
     : socket_fd_(-1)
@@ -391,4 +391,4 @@ bool SeedLinkClient::attemptReconnect() {
     return false;
 }
 
-} // namespace seisproc
+} // namespace realdetect

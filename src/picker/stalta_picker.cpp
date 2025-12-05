@@ -1,9 +1,9 @@
-#include "seisproc/picker/stalta_picker.hpp"
+#include "realdetect/picker/stalta_picker.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
 
-namespace seisproc {
+namespace realdetect {
 
 STALTAPicker::STALTAPicker()
     : sta_length_(0.5)
@@ -293,4 +293,4 @@ double MultiFreqSTALTA::getParameter(const std::string& name) const {
     return 0;
 }
 
-} // namespace seisproc
+} // namespace realdetect

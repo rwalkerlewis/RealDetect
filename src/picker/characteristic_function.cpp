@@ -1,10 +1,10 @@
-#include "seisproc/picker/characteristic_function.hpp"
-#include "seisproc/picker/filter_bank.hpp"
+#include "realdetect/picker/characteristic_function.hpp"
+#include "realdetect/picker/filter_bank.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
 
-namespace seisproc {
+namespace realdetect {
 
 SampleVector CharacteristicFunction::envelope(const SampleVector& data) {
     return HilbertTransform::envelope(data);
@@ -362,4 +362,4 @@ SampleVector HilbertTransform::instantaneousFrequency(const SampleVector& data,
     return freq;
 }
 
-} // namespace seisproc
+} // namespace realdetect

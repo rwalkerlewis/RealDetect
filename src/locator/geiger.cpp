@@ -1,11 +1,11 @@
-#include "seisproc/locator/geiger.hpp"
-#include "seisproc/locator/grid_search.hpp"
+#include "realdetect/locator/geiger.hpp"
+#include "realdetect/locator/grid_search.hpp"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <set>
 
-namespace seisproc {
+namespace realdetect {
 
 GeigerLocator::GeigerLocator()
     : max_iterations_(20)
@@ -523,4 +523,4 @@ std::vector<std::string> LocatorFactory::availableAlgorithms() {
     return {"GridSearch", "OctTree", "Geiger", "NonLinLoc"};
 }
 
-} // namespace seisproc
+} // namespace realdetect
