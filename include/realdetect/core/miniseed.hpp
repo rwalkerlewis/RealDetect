@@ -27,8 +27,8 @@ public:
         STEIM2 = 11
     };
     
-    MiniSeedRecord() : record_length_(512), sample_count_(0), 
-                       sample_rate_(0), encoding_(Encoding::STEIM2) {}
+    MiniSeedRecord() : sample_rate_(0), sample_count_(0), 
+                       record_length_(512), encoding_(Encoding::STEIM2) {}
     
     // Parse from raw data
     bool parse(const uint8_t* data, size_t length);

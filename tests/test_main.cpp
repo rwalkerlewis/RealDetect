@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 ╚══════════════════════════════════════════════════════════════╝
 )" << std::endl;
 
-    std::string suite_filter;
+    std::vector<std::string> suite_filters;
     bool list_only = false;
     
     // Parse arguments
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
             // Verbose mode (could be used for more output)
         } else if (argv[i][0] != '-') {
-            suite_filter = argv[i];
+            suite_filters.push_back(argv[i]);
         }
     }
     
@@ -111,12 +111,15 @@ int main(int argc, char* argv[]) {
     
     std::vector<TestResult> results;
     
-    if (suite_filter.empty()) {
+    if (suite_filters.empty()) {
         // Run all tests
         results = TestRegistry::instance().runAll();
     } else {
-        // Run specific suite
-        results = TestRegistry::instance().runSuite(suite_filter);
+        // Run specific suite(s)
+        for (const auto& suite_filter : suite_filters) {
+            auto suite_results = TestRegistry::instance().runSuite(suite_filter);
+            results.insert(results.end(), suite_results.begin(), suite_results.end());
+        }
     }
     
     // Print summary

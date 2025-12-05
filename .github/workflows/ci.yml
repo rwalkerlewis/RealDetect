@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, 'cursor/**' ]
   pull_request:
     branches: [ main, master, develop ]
 
@@ -20,38 +20,36 @@ jobs:
         include:
           - os: ubuntu-22.04
             compiler: gcc
-            cc: gcc-11
-            cxx: g++-11
           - os: ubuntu-22.04
             compiler: clang
-            cc: clang-14
-            cxx: clang++-14
           - os: ubuntu-20.04
             compiler: gcc
-            cc: gcc-10
-            cxx: g++-10
             
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
     - name: Install dependencies (Ubuntu)
-      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           cmake \
           build-essential \
           libeigen3-dev \
-          libsqlite3-dev \
-          ${{ matrix.cc }} \
-          ${{ matrix.cxx }}
+          libsqlite3-dev
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          sudo apt-get install -y clang
+        fi
           
     - name: Configure CMake
-      env:
-        CC: ${{ matrix.cc }}
-        CXX: ${{ matrix.cxx }}
       run: |
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          export CC=clang
+          export CXX=clang++
+        else
+          export CC=gcc
+          export CXX=g++
+        fi
         cmake -B ${{github.workspace}}/build \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
           -DBUILD_TESTS=ON
