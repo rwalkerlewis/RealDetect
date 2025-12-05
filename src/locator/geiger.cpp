@@ -263,8 +263,8 @@ Eigen::VectorXd GeigerLocator::solveSystem(const Eigen::MatrixXd& G,
     // Weighted least squares: (G'WG + lambda*I)^-1 * G'Wd
     int m = G.cols();
     
-    // Weight matrix
-    Eigen::MatrixXd W = Eigen::MatrixXd::asDiagonal(w);
+    // Weight matrix (create diagonal matrix from weights vector)
+    Eigen::MatrixXd W = w.asDiagonal();
     
     // Normal equations
     Eigen::MatrixXd GtWG = G.transpose() * W * G;
@@ -275,7 +275,7 @@ Eigen::VectorXd GeigerLocator::solveSystem(const Eigen::MatrixXd& G,
     for (int i = 0; i < m; i++) mean_diag += diag(i);
     mean_diag /= m;
     double lambda = damping_factor_ * mean_diag;
-    GtWG.addToDiagonal(Eigen::VectorXd::Constant(m, lambda));
+    GtWG.diagonal() += Eigen::VectorXd::Constant(m, lambda);
     
     Eigen::VectorXd GtWd = G.transpose() * W * d;
     
@@ -303,7 +303,7 @@ void GeigerLocator::computeUncertainties(const Eigen::MatrixXd& G,
                                            double rms,
                                            Origin& origin) {
     // Covariance matrix: sigma^2 * (G'WG)^-1
-    Eigen::MatrixXd W = Eigen::MatrixXd::asDiagonal(w);
+    Eigen::MatrixXd W = w.asDiagonal();
     Eigen::MatrixXd GtWG = G.transpose() * W * G;
     
     Eigen::MatrixXd cov;

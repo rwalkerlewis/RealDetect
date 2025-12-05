@@ -1,0 +1,1 @@
+/usr/bin/g++  -fopenmp -Wall -Wextra -O3 -O3 -DNDEBUG CMakeFiles/realdetect_sim.dir/src/simulator.cpp.o -o realdetect_sim  librealdetect_core.a /usr/lib/x86_64-linux-gnu/libsqlite3.so -ldl /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a 

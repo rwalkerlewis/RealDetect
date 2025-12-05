@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
     
     if (list_only) {
         std::cout << "Available test suites:\n";
+        std::cout << "\n=== Core Tests ===\n";
         std::cout << "  GeoPoint\n";
         std::cout << "  StreamID\n";
         std::cout << "  Waveform\n";
@@ -61,6 +62,7 @@ int main(int argc, char* argv[]) {
         std::cout << "  Pick\n";
         std::cout << "  Origin\n";
         std::cout << "  Event\n";
+        std::cout << "\n=== Picker Tests ===\n";
         std::cout << "  STALTAPicker\n";
         std::cout << "  RecursiveSTALTA\n";
         std::cout << "  AICPicker\n";
@@ -68,12 +70,14 @@ int main(int argc, char* argv[]) {
         std::cout << "  IIRFilter\n";
         std::cout << "  FFT\n";
         std::cout << "  FilterBank\n";
+        std::cout << "\n=== Locator Tests ===\n";
         std::cout << "  TravelTimeTable\n";
         std::cout << "  GridSearchLocator\n";
         std::cout << "  GeigerLocator\n";
         std::cout << "  OctTreeLocator\n";
         std::cout << "  LocatorFactory\n";
         std::cout << "  LocationQuality\n";
+        std::cout << "\n=== Magnitude Tests ===\n";
         std::cout << "  LocalMagnitude\n";
         std::cout << "  DurationMagnitude\n";
         std::cout << "  MomentMagnitude\n";
@@ -81,6 +85,24 @@ int main(int argc, char* argv[]) {
         std::cout << "  SurfaceWaveMagnitude\n";
         std::cout << "  MagnitudeFactory\n";
         std::cout << "  MagnitudeIntegration\n";
+        std::cout << "\n=== Database Tests ===\n";
+        std::cout << "  CSS30Database\n";
+        std::cout << "  CSS30Writer\n";
+        std::cout << "\n=== MiniSEED Tests ===\n";
+        std::cout << "  MiniSeedRecord\n";
+        std::cout << "  MiniSeedReader\n";
+        std::cout << "\n=== Associator Tests ===\n";
+        std::cout << "  PhaseAssociator\n";
+        std::cout << "  NucleatorAssociator\n";
+        std::cout << "  AssociationCandidate\n";
+        std::cout << "\n=== Regional Velocity Model Tests ===\n";
+        std::cout << "  GeographicBounds\n";
+        std::cout << "  RegionalVelocityModel\n";
+        std::cout << "  VelocityModelManager\n";
+        std::cout << "  VelocityModelLoader\n";
+        std::cout << "\n=== Integration Tests ===\n";
+        std::cout << "  Integration\n";
+        std::cout << "\n=== Benchmark Tests ===\n";
         std::cout << "  BenchmarkPipeline\n";
         std::cout << "  BenchmarkPerformance\n";
         std::cout << "  BenchmarkAccuracy\n";

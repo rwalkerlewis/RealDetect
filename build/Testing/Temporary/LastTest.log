@@ -1,0 +1,707 @@
+Start testing: Dec 05 01:10 UTC
+----------------------------------------------------------
+1/10 Testing: unit_tests
+1/10 Test: unit_tests
+Command: "/workspace/build/realdetect_tests"
+Directory: /workspace/build
+"unit_tests" start time: Dec 05 01:10 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== AICPicker ===
+  ✓ ComputeAIC (0.02ms)
+  ✓ FindAICMinimum (0.00ms)
+  ✓ RefinePick (0.01ms)
+
+=== AssocTravelTime ===
+  ✓ Initialize (0.28ms)
+  ✓ GetTimeP (0.20ms)
+  ✓ GetTimeS (0.19ms)
+  ✓ TimeIncreaseWithDistance (0.20ms)
+  ✓ TimeIncreaseWithDepth (0.20ms)
+  ✓ Derivatives (0.20ms)
+
+=== AssociationCandidate ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ AddPick (0.00ms)
+
+=== BenchmarkAccuracy ===
+    Location error vs pick noise:
+      Noise=0.00s -> Error=3.53 km
+      Noise=0.10s -> Error=1.00 km
+      Noise=0.20s -> Error=8.11 km
+      Noise=0.50s -> Error=0.38 km
+      Noise=1.00s -> Error=22.17 km
+  ✓ LocationVsNoise (7.36ms)
+    Location error vs station count:
+      Stations=3 -> Error=0.00 km
+      Stations=4 -> Error=0.00 km
+      Stations=6 -> Error=0.00 km
+      Stations=8 -> Error=0.00 km
+      Stations=12 -> Error=0.00 km
+  ✓ LocationVsStationCount (6.91ms)
+
+=== BenchmarkPerformance ===
+    Picker processed 10 min in 0.55 ms
+  ✓ PickerSpeed (1.37ms)
+    Geiger located in 0.15 ms (20 iterations)
+  ✓ LocatorSpeed (1.52ms)
+    Grid search completed in 204.21 ms
+  ✓ GridSearchSpeed (205.59ms)
+
+=== BenchmarkPipeline ===
+  ✓ SmallLocalEvent (326.02ms)
+  ✓ ModerateRegionalEvent (717.64ms)
+  ✓ NorthridgeScenario (448.39ms)
+
+=== BodyWaveMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+
+=== CSS30Database ===
+  ✓ CreateAndOpen (3.88ms)
+  ✓ CreateSchema (10.70ms)
+  ✓ SchemaVersion (8.88ms)
+  ✓ SetAuthor (0.00ms)
+  ✓ StoreEvent (8.36ms)
+  ✓ StoreOrigin (8.17ms)
+  ✓ StoreCompleteEvent (12.63ms)
+  ✓ StoreSite (10.32ms)
+  ✓ StoreInventory (9.89ms)
+  ✓ QueryEvents (10.96ms)
+  ✓ QueryOrigins (10.06ms)
+  ✓ Transaction (10.13ms)
+  ✓ TransactionRollback (8.80ms)
+  ✓ Statistics (7.57ms)
+
+=== CSS30Writer ===
+  ✓ WriteEvent (9.00ms)
+  ✓ WriteEvents (9.74ms)
+  ✓ WriteInventory (5.67ms)
+
+=== CharacteristicFunction ===
+  ✓ Envelope (0.07ms)
+  ✓ Kurtosis (4.97ms)
+  ✓ EnergyRatio (0.05ms)
+
+=== Config ===
+  ✓ SetAndGet (0.01ms)
+  ✓ DefaultValues (0.00ms)
+  ✓ HasKey (0.00ms)
+
+=== DurationMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetCoefficients (0.00ms)
+
+=== Event ===
+  ✓ CreateWithId (0.00ms)
+  ✓ AutoId (0.02ms)
+  ✓ AddOrigin (0.01ms)
+  ✓ AddMagnitude (0.01ms)
+  ✓ ConvenienceAccessors (0.01ms)
+
+=== FFT ===
+  ✓ ForwardInverse (0.00ms)
+  ✓ PowerSpectrum (0.01ms)
+  ✓ DominantFrequency (0.01ms)
+  ✓ NextPow2 (0.00ms)
+
+=== FilterBank ===
+  ✓ AddBands (0.00ms)
+  ✓ Configure (0.01ms)
+  ✓ Filter (0.05ms)
+
+=== GeigerLocator ===
+  ✓ DefaultParameters (0.87ms)
+  ✓ SetParameters (0.74ms)
+  ✓ LocatePerfectData (779.56ms)
+  ✓ LocateWithNoise (1.45ms)
+  ✓ Relocate (778.40ms)
+  ✓ FixedDepth (1.48ms)
+  ✓ RMSImprovement (776.75ms)
+
+=== GeoPoint ===
+  ✓ Constructor (0.00ms)
+  ✓ DefaultConstructor (0.00ms)
+  ✓ DistanceToSamePoint (0.00ms)
+  ✓ DistanceToNearby (0.00ms)
+  ✓ DistanceLondon_NewYork (0.00ms)
+  ✓ AzimuthNorth (0.00ms)
+  ✓ AzimuthEast (0.00ms)
+  ✓ AzimuthSouth (0.00ms)
+
+=== GeographicBounds ===
+  ✓ BoundingBox (0.01ms)
+  ✓ BoundingBoxWithDepth (0.00ms)
+  ✓ Circle (0.00ms)
+  ✓ Polygon (0.00ms)
+  ✓ GetBoundingBox (0.00ms)
+  ✓ ToString (0.00ms)
+  ✓ FromString (0.04ms)
+
+=== GridSearchLocator ===
+  ✓ DefaultParameters (0.73ms)
+  ✓ SetParameters (0.71ms)
+  ✓ LocatePerfectData (198.22ms)
+  ✓ LocateWithNoise (775.84ms)
+  ✓ FixedDepth (33.49ms)
+
+=== IIRFilter ===
+  ✓ ButterworthBandpass (0.01ms)
+  ✓ FilterConstant (0.01ms)
+  ✓ FilterHighFrequency (0.02ms)
+  ✓ FiltFiltZeroPhase (0.02ms)
+
+=== Integration ===
+  ✓ FullPipelineSmallEvent (255.99ms)
+  ✓ FullPipelineModerateEvent (702.19ms)
+  ✓ EventToDatabase (531.36ms)
+  ✓ MultipleEventsToDatabase (6610.81ms)
+  ✓ RegionalVelocityModelSelection (0.02ms)
+    Processed 400 picks from 10 events in 90.32 ms
+  ✓ HighVolumeProcessing (90.38ms)
+  ✓ ContinuousStreamSimulation (2173.20ms)
+  ✓ HandleMissingStations (758.37ms)
+  ✓ HandleNoisyData (665.83ms)
+
+=== LocalMagnitude ===
+  ✓ DefaultParameters (0.02ms)
+  ✓ SetParameters (0.00ms)
+  ✓ CalculateWithSyntheticData (0.62ms)
+  ✓ StationCorrection (0.64ms)
+  ✓ DistanceFiltering (0.59ms)
+
+=== LocationQuality ===
+  ✓ ComputeGap (1.40ms)
+  ✓ PhaseCount (1.36ms)
+
+=== LocatorFactory ===
+  ✓ CreateGridSearch (0.70ms)
+  ✓ CreateGeiger (0.71ms)
+  ✓ CreateOctTree (0.00ms)
+  ✓ AvailableAlgorithms (0.00ms)
+
+=== MagnitudeFactory ===
+  ✓ CreateML (0.01ms)
+  ✓ CreateMw (0.00ms)
+  ✓ CreateMb (0.00ms)
+  ✓ CreateMs (0.00ms)
+  ✓ CreateMd (0.00ms)
+  ✓ AvailableTypes (0.00ms)
+
+=== MagnitudeIntegration ===
+  ✓ MLConsistency (0.60ms)
+  ✓ NetworkMagnitude (0.63ms)
+
+=== MiniSeedReader ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ EmptyFile (0.11ms)
+  ✓ ParseEmptyData (0.00ms)
+  ✓ ToWaveformsEmpty (0.00ms)
+
+=== MiniSeedRecord ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ SetStreamId (0.00ms)
+  ✓ SetStartTime (0.00ms)
+  ✓ SetSampleRate (0.00ms)
+  ✓ SetSamples (0.00ms)
+  ✓ SetRecordLength (0.00ms)
+  ✓ SetEncoding (0.00ms)
+  ✓ ToWaveform (0.01ms)
+  ✓ EncodingTypes (0.00ms)
+  ✓ HeaderConstants (0.00ms)
+  ✓ SyntheticData (0.00ms)
+  ✓ MultiChannelData (0.01ms)
+  ✓ ContinuousRecords (0.02ms)
+  ✓ VariousSampleRates (0.00ms)
+  ✓ LargeWaveform (9.90ms)
+
+=== MomentMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+  ✓ BruneSpectrum (0.66ms)
+
+=== NucleatorAssociator ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ SetStations (0.01ms)
+  ✓ SetVelocityModel (0.72ms)
+  ✓ SetGrid (0.03ms)
+  ✓ SetParameters (0.00ms)
+  ✓ AddPick (0.00ms)
+  ✓ ProcessPicks (2.26ms)
+
+=== OctTreeLocator ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetSearchBounds (0.00ms)
+  ✓ LocatePerfectData (142.26ms)
+
+=== Origin ===
+  ✓ QualityCode (0.00ms)
+
+=== PhaseAssociator ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ SetStations (0.00ms)
+  ✓ SetVelocityModel (0.73ms)
+  ✓ SetParameters (0.00ms)
+  ✓ AddPick (0.00ms)
+  ✓ AssociatePerfectPicks (0.76ms)
+  ✓ AssociateNoisyPicks (0.79ms)
+  ✓ NoEventFromScatteredPicks (0.72ms)
+  ✓ EventCallback (0.77ms)
+  ✓ UnassociatedPicks (0.72ms)
+  ✓ TwoEvents (0.87ms)
+  ✓ TooFewPicks (0.71ms)
+  ✓ OnlyPWaves (0.75ms)
+
+=== PhaseType ===
+  ✓ ToString (0.00ms)
+  ✓ FromString (0.00ms)
+
+=== Pick ===
+  ✓ Weight (0.00ms)
+  ✓ LocationWeight (0.00ms)
+
+=== RecursiveSTALTA ===
+  ✓ Initialize (0.00ms)
+  ✓ ProcessSamples (0.00ms)
+  ✓ DetectAmplitudeChange (0.00ms)
+  ✓ Reset (0.01ms)
+
+=== RegionalVelocityModel ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ Contains (0.00ms)
+
+=== STALTAPicker ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+  ✓ SetParameterByName (0.00ms)
+  ✓ NoPickOnNoise (0.05ms)
+  ✓ DetectClearArrival (0.09ms)
+  ✓ CharacteristicFunction (0.07ms)
+  ✓ MultiplePicks (0.14ms)
+
+=== Station ===
+  ✓ Constructor (0.00ms)
+  ✓ AddChannel (0.00ms)
+  ✓ DistanceTo (0.00ms)
+
+=== StationInventory ===
+  ✓ AddAndGet (0.00ms)
+  ✓ StationsWithin (0.00ms)
+
+=== StreamID ===
+  ✓ Constructor (0.00ms)
+  ✓ ToString (0.00ms)
+  ✓ Equality (0.00ms)
+  ✓ Comparison (0.00ms)
+
+=== SurfaceWaveMagnitude ===
+  ✓ DefaultParameters (0.00ms)
+  ✓ SetParameters (0.00ms)
+
+=== TravelTimeTable ===
+  ✓ Initialize (0.18ms)
+  ✓ GetTime (0.18ms)
+  ✓ Derivatives (0.17ms)
+
+=== VelocityModel ===
+  ✓ SimpleThreeLayer (0.00ms)
+  ✓ IASP91 (0.00ms)
+  ✓ TravelTime (0.00ms)
+  ✓ AddLayer (0.00ms)
+
+=== VelocityModelLoader ===
+Failed to open velocity model: /tmp/nonexistent_file.vel
+  ✓ LoadNonExistent (0.04ms)
+
+=== VelocityModelManager ===
+  ✓ DefaultConstructor (0.00ms)
+  ✓ SetDefaultModel (0.00ms)
+  ✓ AddModel (0.00ms)
+  ✓ AddMultipleModels (0.00ms)
+  ✓ RemoveModel (0.00ms)
+  ✓ GetModelForLocation (0.00ms)
+  ✓ GetModelForLocationCoordinates (0.00ms)
+  ✓ GetModelByName (0.00ms)
+  ✓ GetModelNameForLocation (0.00ms)
+  ✓ ModelNames (0.01ms)
+  ✓ FindMatchingModels (0.00ms)
+  ✓ Priority (0.01ms)
+  ✓ IntegrationWithLocator (0.00ms)
+  ✓ TravelTimeCalculation (0.00ms)
+
+=== Waveform ===
+  ✓ Constructor (0.00ms)
+  ✓ AppendSamples (0.00ms)
+  ✓ Mean (0.00ms)
+  ✓ Demean (0.00ms)
+  ✓ AbsMax (0.00ms)
+  ✓ Normalize (0.00ms)
+  ✓ Slice (0.00ms)
+  ✓ Duration (0.00ms)
+
+========================================
+Test Summary
+========================================
+Passed: 221/221
+Failed: 0
+Total time: 17173.73ms
+========================================
+<end of output>
+Test time =  17.18 sec
+----------------------------------------------------------
+Test Passed.
+"unit_tests" end time: Dec 05 01:10 UTC
+"unit_tests" time elapsed: 00:00:17
+----------------------------------------------------------
+
+2/10 Testing: core_tests
+2/10 Test: core_tests
+Command: "/workspace/build/realdetect_tests" "GeoPoint" "StreamID" "Waveform" "Station" "Config"
+Directory: /workspace/build
+"core_tests" start time: Dec 05 01:10 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== Config ===
+  ✓ SetAndGet
+  ✓ DefaultValues
+  ✓ HasKey
+
+========================================
+Test Summary
+========================================
+Passed: 3/3
+Failed: 0
+Total time: 0.02ms
+========================================
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"core_tests" end time: Dec 05 01:10 UTC
+"core_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/10 Testing: picker_tests
+3/10 Test: picker_tests
+Command: "/workspace/build/realdetect_tests" "STALTAPicker" "AICPicker" "CharacteristicFunction"
+Directory: /workspace/build
+"picker_tests" start time: Dec 05 01:10 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== CharacteristicFunction ===
+  ✓ Envelope
+  ✓ Kurtosis
+  ✓ EnergyRatio
+
+========================================
+Test Summary
+========================================
+Passed: 3/3
+Failed: 0
+Total time: 5.21ms
+========================================
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"picker_tests" end time: Dec 05 01:10 UTC
+"picker_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/10 Testing: locator_tests
+4/10 Test: locator_tests
+Command: "/workspace/build/realdetect_tests" "TravelTimeTable" "GridSearchLocator" "GeigerLocator"
+Directory: /workspace/build
+"locator_tests" start time: Dec 05 01:10 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== GeigerLocator ===
+  ✓ DefaultParameters
+  ✓ SetParameters
+  ✓ LocatePerfectData
+  ✓ LocateWithNoise
+  ✓ Relocate
+  ✓ FixedDepth
+  ✓ RMSImprovement
+
+========================================
+Test Summary
+========================================
+Passed: 7/7
+Failed: 0
+Total time: 2347.81ms
+========================================
+<end of output>
+Test time =   2.35 sec
+----------------------------------------------------------
+Test Passed.
+"locator_tests" end time: Dec 05 01:11 UTC
+"locator_tests" time elapsed: 00:00:02
+----------------------------------------------------------
+
+5/10 Testing: magnitude_tests
+5/10 Test: magnitude_tests
+Command: "/workspace/build/realdetect_tests" "LocalMagnitude" "MomentMagnitude"
+Directory: /workspace/build
+"magnitude_tests" start time: Dec 05 01:11 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== MomentMagnitude ===
+  ✓ DefaultParameters
+  ✓ SetParameters
+  ✓ BruneSpectrum
+
+========================================
+Test Summary
+========================================
+Passed: 3/3
+Failed: 0
+Total time: 0.83ms
+========================================
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"magnitude_tests" end time: Dec 05 01:11 UTC
+"magnitude_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/10 Testing: database_tests
+6/10 Test: database_tests
+Command: "/workspace/build/realdetect_tests" "CSS30Database" "CSS30Writer"
+Directory: /workspace/build
+"database_tests" start time: Dec 05 01:11 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== CSS30Writer ===
+  ✓ WriteEvent
+  ✓ WriteEvents
+  ✓ WriteInventory
+
+========================================
+Test Summary
+========================================
+Passed: 3/3
+Failed: 0
+Total time: 38.25ms
+========================================
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"database_tests" end time: Dec 05 01:11 UTC
+"database_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/10 Testing: associator_tests
+7/10 Test: associator_tests
+Command: "/workspace/build/realdetect_tests" "PhaseAssociator" "NucleatorAssociator"
+Directory: /workspace/build
+"associator_tests" start time: Dec 05 01:11 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== NucleatorAssociator ===
+  ✓ DefaultConstructor
+  ✓ SetStations
+  ✓ SetVelocityModel
+  ✓ SetGrid
+  ✓ SetParameters
+  ✓ AddPick
+  ✓ ProcessPicks
+
+========================================
+Test Summary
+========================================
+Passed: 7/7
+Failed: 0
+Total time: 3.86ms
+========================================
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"associator_tests" end time: Dec 05 01:11 UTC
+"associator_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/10 Testing: regional_velocity_tests
+8/10 Test: regional_velocity_tests
+Command: "/workspace/build/realdetect_tests" "GeographicBounds" "RegionalVelocityModel" "VelocityModelManager"
+Directory: /workspace/build
+"regional_velocity_tests" start time: Dec 05 01:11 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== VelocityModelManager ===
+  ✓ DefaultConstructor
+  ✓ SetDefaultModel
+  ✓ AddModel
+  ✓ AddMultipleModels
+  ✓ RemoveModel
+  ✓ GetModelForLocation
+  ✓ GetModelForLocationCoordinates
+  ✓ GetModelByName
+  ✓ GetModelNameForLocation
+  ✓ ModelNames
+  ✓ FindMatchingModels
+  ✓ Priority
+  ✓ IntegrationWithLocator
+  ✓ TravelTimeCalculation
+
+========================================
+Test Summary
+========================================
+Passed: 14/14
+Failed: 0
+Total time: 0.04ms
+========================================
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"regional_velocity_tests" end time: Dec 05 01:11 UTC
+"regional_velocity_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/10 Testing: integration_tests
+9/10 Test: integration_tests
+Command: "/workspace/build/realdetect_tests" "Integration"
+Directory: /workspace/build
+"integration_tests" start time: Dec 05 01:11 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== Integration ===
+  ✓ FullPipelineSmallEvent
+  ✓ FullPipelineModerateEvent
+  ✓ EventToDatabase
+  ✓ MultipleEventsToDatabase
+  ✓ RegionalVelocityModelSelection
+    Processed 400 picks from 10 events in 89.9987 ms
+  ✓ HighVolumeProcessing
+  ✓ ContinuousStreamSimulation
+  ✓ HandleMissingStations
+  ✓ HandleNoisyData
+
+========================================
+Test Summary
+========================================
+Passed: 9/9
+Failed: 0
+Total time: 11809.57ms
+========================================
+<end of output>
+Test time =  11.81 sec
+----------------------------------------------------------
+Test Passed.
+"integration_tests" end time: Dec 05 01:11 UTC
+"integration_tests" time elapsed: 00:00:11
+----------------------------------------------------------
+
+10/10 Testing: benchmark_tests
+10/10 Test: benchmark_tests
+Command: "/workspace/build/realdetect_tests" "BenchmarkPipeline" "BenchmarkPerformance" "BenchmarkAccuracy"
+Directory: /workspace/build
+"benchmark_tests" start time: Dec 05 01:11 UTC
+Output:
+----------------------------------------------------------
+
+╔══════════════════════════════════════════════════════════════╗
+║                    SeisProc Test Suite                       ║
+║              Real-time Seismic Processing Tests              ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+=== BenchmarkAccuracy ===
+    Location error vs pick noise:
+      Noise=0s -> Error=3.53436 km
+      Noise=0.1s -> Error=1.00301 km
+      Noise=0.2s -> Error=8.10874 km
+      Noise=0.5s -> Error=0.375099 km
+      Noise=1s -> Error=22.1727 km
+  ✓ LocationVsNoise
+    Location error vs station count:
+      Stations=3 -> Error=0 km
+      Stations=4 -> Error=0 km
+      Stations=6 -> Error=0 km
+      Stations=8 -> Error=1.30226e-12 km
+      Stations=12 -> Error=1.30226e-12 km
+  ✓ LocationVsStationCount
+
+========================================
+Test Summary
+========================================
+Passed: 2/2
+Failed: 0
+Total time: 14.96ms
+========================================
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"benchmark_tests" end time: Dec 05 01:11 UTC
+"benchmark_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Dec 05 01:11 UTC
