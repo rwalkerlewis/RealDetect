@@ -13,6 +13,7 @@ jobs:
   build-and-test:
     name: Build and Test (${{ matrix.os }}, ${{ matrix.compiler }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     
     strategy:
       fail-fast: false
@@ -22,7 +23,7 @@ jobs:
             compiler: gcc
           - os: ubuntu-22.04
             compiler: clang
-          - os: ubuntu-20.04
+          - os: ubuntu-24.04
             compiler: gcc
             
     steps:
@@ -40,6 +41,7 @@ jobs:
         if [ "${{ matrix.compiler }}" = "clang" ]; then
           sudo apt-get install -y clang
         fi
+      timeout-minutes: 5
           
     - name: Configure CMake
       run: |
@@ -53,22 +55,26 @@ jobs:
         cmake -B ${{github.workspace}}/build \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
           -DBUILD_TESTS=ON
+      timeout-minutes: 5
           
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j$(nproc)
+      timeout-minutes: 10
       
     - name: Run unit tests
       working-directory: ${{github.workspace}}/build
-      run: |
-        ./realdetect_tests
+      run: ./realdetect_tests
+      timeout-minutes: 10
         
     - name: Run CTest
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+      timeout-minutes: 10
 
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     
     steps:
     - name: Checkout code
@@ -82,31 +88,38 @@ jobs:
           build-essential \
           libeigen3-dev \
           libsqlite3-dev
+      timeout-minutes: 5
           
     - name: Configure and Build
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
         cmake --build build -j$(nproc)
+      timeout-minutes: 10
         
     - name: Run Core Tests
       working-directory: build
       run: ./realdetect_tests GeoPoint StreamID Waveform Station Config
+      timeout-minutes: 5
       
     - name: Run Picker Tests
       working-directory: build
       run: ./realdetect_tests STALTAPicker AICPicker CharacteristicFunction IIRFilter FFT FilterBank
+      timeout-minutes: 5
       
     - name: Run Locator Tests
       working-directory: build
       run: ./realdetect_tests TravelTimeTable GridSearchLocator GeigerLocator LocatorFactory
+      timeout-minutes: 5
       
     - name: Run Magnitude Tests
       working-directory: build
       run: ./realdetect_tests LocalMagnitude MomentMagnitude MagnitudeFactory
+      timeout-minutes: 5
 
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     
     steps:
     - name: Checkout code
@@ -120,11 +133,13 @@ jobs:
           build-essential \
           libeigen3-dev \
           libsqlite3-dev
+      timeout-minutes: 5
           
     - name: Configure and Build
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
         cmake --build build -j$(nproc)
+      timeout-minutes: 10
         
     - name: Run Integration Tests
       working-directory: build
@@ -134,6 +149,7 @@ jobs:
   benchmark-tests:
     name: Benchmark Tests
     runs-on: ubuntu-22.04
+    timeout-minutes: 25
     
     steps:
     - name: Checkout code
@@ -147,11 +163,13 @@ jobs:
           build-essential \
           libeigen3-dev \
           libsqlite3-dev
+      timeout-minutes: 5
           
     - name: Configure and Build
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
         cmake --build build -j$(nproc)
+      timeout-minutes: 10
         
     - name: Run Benchmark Tests
       working-directory: build
@@ -161,6 +179,7 @@ jobs:
   database-tests:
     name: Database Tests
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -174,19 +193,23 @@ jobs:
           build-essential \
           libeigen3-dev \
           libsqlite3-dev
+      timeout-minutes: 5
           
     - name: Configure and Build
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
         cmake --build build -j$(nproc)
+      timeout-minutes: 10
         
     - name: Run Database Tests
       working-directory: build
       run: ./realdetect_tests CSS30Database CSS30Writer
+      timeout-minutes: 5
 
   code-quality:
     name: Code Quality Checks
     runs-on: ubuntu-22.04
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -201,6 +224,7 @@ jobs:
           libeigen3-dev \
           libsqlite3-dev \
           cppcheck
+      timeout-minutes: 5
           
     - name: Run cppcheck
       run: |
@@ -209,10 +233,12 @@ jobs:
           --error-exitcode=0 \
           -I include \
           src/ tests/
+      timeout-minutes: 10
 
   build-executables:
     name: Build All Executables
     runs-on: ubuntu-22.04
+    timeout-minutes: 20
     
     steps:
     - name: Checkout code
@@ -226,11 +252,13 @@ jobs:
           build-essential \
           libeigen3-dev \
           libsqlite3-dev
+      timeout-minutes: 5
           
     - name: Configure and Build
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
         cmake --build build -j$(nproc)
+      timeout-minutes: 10
         
     - name: List built artifacts
       run: |
