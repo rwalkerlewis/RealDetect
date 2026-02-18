@@ -29,17 +29,16 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-0 \
     libgomp1 \
-    libeigen3-dev \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir \
     fastapi \
-    uvicorn[standard] \
+    'uvicorn[standard]' \
     aiosqlite \
     jinja2
 
@@ -54,8 +53,13 @@ COPY --from=builder /app/build/realdetect_tests /app/bin/realdetect_tests
 COPY config/ /app/config/
 COPY gui/ /app/gui/
 
+RUN mkdir -p /app/data
+
 ENV PATH="/app/bin:${PATH}"
+ENV REALDETECT_STATIONS="/app/config/stations.txt"
+ENV REALDETECT_CONFIG="/app/config/realdetect.conf"
+ENV REALDETECT_DB="/app/data/realdetect_catalog.db"
 
 EXPOSE 8080
 
-CMD ["python3", "/app/gui/server.py"]
+CMD ["python3", "/app/gui/server.py", "--host", "0.0.0.0", "--port", "8080"]

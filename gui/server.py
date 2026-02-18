@@ -12,6 +12,7 @@ import os
 import re
 import sqlite3
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
@@ -21,7 +22,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-app = FastAPI(title="RealDetect", description="Real-time Seismic Monitoring GUI")
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    task = asyncio.create_task(poll_events())
+    yield
+    task.cancel()
+
+
+app = FastAPI(title="RealDetect", description="Real-time Seismic Monitoring GUI",
+              lifespan=lifespan)
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -242,11 +252,6 @@ async def poll_events():
                 "stats": stats,
                 "timestamp": time.time(),
             })
-
-
-@app.on_event("startup")
-async def startup():
-    asyncio.create_task(poll_events())
 
 
 # ---------------------------------------------------------------------------
