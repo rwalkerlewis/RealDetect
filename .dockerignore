@@ -1,0 +1,13 @@
+.git
+build/
+cmake-build-*/
+*.o
+*.a
+*.so
+*.dylib
+*.db
+*.log
+.idea/
+.vscode/
+__pycache__/
+*.pyc

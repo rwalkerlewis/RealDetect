@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealDetect — Seismic Monitor</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Top header bar -->
+<header id="header">
+  <div class="header-left">
+    <h1>RealDetect</h1>
+    <span class="subtitle">Real-time Seismic Monitor</span>
+  </div>
+  <div class="header-right">
+    <span id="conn-status" class="status-badge disconnected">Disconnected</span>
+    <span id="clock"></span>
+  </div>
+</header>
+
+<!-- Main layout: sidebar + map -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <!-- Stats panel -->
+    <section class="panel" id="stats-panel">
+      <h2>System Status</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-stations">0</div>
+          <div class="stat-label">Stations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-events">0</div>
+          <div class="stat-label">Events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-arrivals">0</div>
+          <div class="stat-label">Arrivals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-origins">0</div>
+          <div class="stat-label">Origins</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layer controls -->
+    <section class="panel" id="layers-panel">
+      <h2>Layers</h2>
+      <label class="layer-toggle">
+        <input type="checkbox" id="layer-stations" checked> Stations
+      </label>
+      <label class="layer-toggle">
+        <input type="checkbox" id="layer-events" checked> Events
+      </label>
+      <label class="layer-toggle">
+        <input type="checkbox" id="layer-arrivals"> Arrival Lines
+      </label>
+      <div class="layer-section">
+        <h3>Base Map</h3>
+        <select id="basemap-select">
+          <option value="osm">OpenStreetMap</option>
+          <option value="topo">Topographic</option>
+          <option value="dark">Dark</option>
+          <option value="satellite">Satellite</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Event list -->
+    <section class="panel" id="events-panel">
+      <h2>Recent Events</h2>
+      <div id="event-list" class="event-list"></div>
+    </section>
+  </aside>
+
+  <!-- Map container -->
+  <div id="map"></div>
+</div>
+
+<!-- Event detail popup (hidden by default) -->
+<div id="event-detail" class="detail-overlay hidden">
+  <div class="detail-card">
+    <button class="detail-close" onclick="closeDetail()">&times;</button>
+    <h2 id="detail-title">Event Details</h2>
+    <table id="detail-table">
+      <tbody id="detail-body"></tbody>
+    </table>
+    <h3>Phase Arrivals</h3>
+    <div id="detail-arrivals"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
