@@ -8,9 +8,12 @@ seismic stations and detected events in real time.
 import argparse
 import asyncio
 import json
+import math
 import os
+import random
 import re
 import sqlite3
+import subprocess
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -319,6 +322,310 @@ async def websocket_endpoint(ws: WebSocket):
                 })
     except WebSocketDisconnect:
         manager.disconnect(ws)
+
+
+# ---------------------------------------------------------------------------
+# Demo data generation — populates the DB with realistic sample events
+# ---------------------------------------------------------------------------
+
+DEMO_EVENTS = [
+    {
+        "name": "DPRK Nuclear Test (2017-09-03)",
+        "lat": 41.343, "lon": 129.036, "depth": 0.5,
+        "time": 1504405801.6, "mag": 6.3, "magtype": "mb",
+        "stations_file": "config/stations_korea.txt",
+    },
+    {
+        "name": "Ridgecrest M7.1 (2019-07-06)",
+        "lat": 35.770, "lon": -117.599, "depth": 8.0,
+        "time": 1562383619.0, "mag": 7.1, "magtype": "ML",
+        "stations_file": "config/stations.txt",
+    },
+    {
+        "name": "Southern California M4.2",
+        "lat": 33.95, "lon": -117.75, "depth": 12.3,
+        "time": None, "mag": 4.2, "magtype": "ML",
+        "stations_file": "config/stations.txt",
+    },
+    {
+        "name": "Anza M3.5",
+        "lat": 33.55, "lon": -116.57, "depth": 14.1,
+        "time": None, "mag": 3.5, "magtype": "ML",
+        "stations_file": "config/stations.txt",
+    },
+    {
+        "name": "San Bernardino M2.8",
+        "lat": 34.10, "lon": -117.30, "depth": 6.7,
+        "time": None, "mag": 2.8, "magtype": "ML",
+        "stations_file": "config/stations.txt",
+    },
+    {
+        "name": "Baja California M5.0",
+        "lat": 32.45, "lon": -115.30, "depth": 10.0,
+        "time": None, "mag": 5.0, "magtype": "ML",
+        "stations_file": "config/stations.txt",
+    },
+]
+
+
+def _ensure_css30_schema(db_path: str):
+    """Create CSS3.0 tables if they don't exist."""
+    os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+    conn = sqlite3.connect(db_path)
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS event (
+            evid INTEGER PRIMARY KEY,
+            evname TEXT DEFAULT '-',
+            prefor INTEGER DEFAULT -1,
+            commid INTEGER DEFAULT -1,
+            lddate REAL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS origin (
+            orid INTEGER PRIMARY KEY,
+            evid INTEGER DEFAULT -1,
+            jdate INTEGER DEFAULT -1,
+            grn INTEGER DEFAULT -1,
+            srn INTEGER DEFAULT -1,
+            etype TEXT DEFAULT '-',
+            lat REAL DEFAULT -999.0,
+            lon REAL DEFAULT -999.0,
+            depth REAL DEFAULT -999.0,
+            time REAL DEFAULT -9999999999.0,
+            nass INTEGER DEFAULT -1,
+            ndef INTEGER DEFAULT -1,
+            ndp INTEGER DEFAULT -1,
+            dtype TEXT DEFAULT '-',
+            algorithm TEXT DEFAULT '-',
+            auth TEXT DEFAULT '-',
+            commid2 INTEGER DEFAULT -1,
+            lddate REAL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS origerr (
+            orid INTEGER PRIMARY KEY,
+            sxx REAL DEFAULT -1, syy REAL DEFAULT -1, szz REAL DEFAULT -1,
+            stt REAL DEFAULT -1, sxy REAL DEFAULT -1, sxz REAL DEFAULT -1,
+            syz REAL DEFAULT -1, stx REAL DEFAULT -1, sty REAL DEFAULT -1,
+            stz REAL DEFAULT -1, sdobs REAL DEFAULT -1, smajax REAL DEFAULT -1,
+            sminax REAL DEFAULT -1, strike REAL DEFAULT -1,
+            sdepth REAL DEFAULT -1, stime REAL DEFAULT -1,
+            conf REAL DEFAULT 0.90, commid INTEGER DEFAULT -1,
+            lddate REAL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS arrival (
+            arid INTEGER PRIMARY KEY,
+            sta TEXT DEFAULT '-',
+            time REAL DEFAULT -9999999999.0,
+            endtime REAL DEFAULT -9999999999.0,
+            nsamp INTEGER DEFAULT -1,
+            samprate REAL DEFAULT -1.0,
+            chan TEXT DEFAULT '-',
+            iphase TEXT DEFAULT '-',
+            stype TEXT DEFAULT '-',
+            deltim REAL DEFAULT -1.0,
+            azimuth REAL DEFAULT -1.0,
+            delaz REAL DEFAULT -1.0,
+            slow REAL DEFAULT -1.0,
+            delslo REAL DEFAULT -1.0,
+            ema REAL DEFAULT -1.0,
+            rect REAL DEFAULT -1.0,
+            amp REAL DEFAULT -1.0,
+            per REAL DEFAULT -1.0,
+            logat REAL DEFAULT -1.0,
+            clip TEXT DEFAULT '-',
+            fm TEXT DEFAULT '-',
+            snr REAL DEFAULT -1.0,
+            qual TEXT DEFAULT '-',
+            auth TEXT DEFAULT '-',
+            commid INTEGER DEFAULT -1,
+            lddate REAL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS assoc (
+            arid INTEGER,
+            orid INTEGER,
+            sta TEXT DEFAULT '-',
+            phase TEXT DEFAULT '-',
+            belief REAL DEFAULT -1.0,
+            delta REAL DEFAULT -1.0,
+            seaz REAL DEFAULT -1.0,
+            esaz REAL DEFAULT -1.0,
+            timeres REAL DEFAULT -999.0,
+            timedef TEXT DEFAULT 'd',
+            azres REAL DEFAULT -999.0,
+            azdef TEXT DEFAULT '-',
+            slores REAL DEFAULT -999.0,
+            slodef TEXT DEFAULT '-',
+            emares REAL DEFAULT -999.0,
+            wgt REAL DEFAULT -1.0,
+            vmodel TEXT DEFAULT '-',
+            commid INTEGER DEFAULT -1,
+            lddate REAL DEFAULT 0,
+            PRIMARY KEY (arid, orid)
+        );
+        CREATE TABLE IF NOT EXISTS netmag (
+            magid INTEGER PRIMARY KEY,
+            net TEXT DEFAULT '-',
+            orid INTEGER DEFAULT -1,
+            evid INTEGER DEFAULT -1,
+            magtype TEXT DEFAULT '-',
+            nsta INTEGER DEFAULT -1,
+            magnitude REAL DEFAULT -999.0,
+            uncertainty REAL DEFAULT -1.0,
+            auth TEXT DEFAULT '-',
+            commid INTEGER DEFAULT -1,
+            lddate REAL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS site (
+            sta TEXT,
+            ondate REAL DEFAULT -1,
+            offdate REAL DEFAULT -1,
+            lat REAL DEFAULT -999.0,
+            lon REAL DEFAULT -999.0,
+            elev REAL DEFAULT -999.0,
+            staname TEXT DEFAULT '-',
+            statype TEXT DEFAULT '-',
+            refsta TEXT DEFAULT '-',
+            dnorth REAL DEFAULT 0.0,
+            deast REAL DEFAULT 0.0,
+            lddate REAL DEFAULT 0,
+            PRIMARY KEY (sta, ondate)
+        );
+    """)
+    conn.commit()
+    conn.close()
+
+
+def _haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    rlat1, rlat2 = math.radians(lat1), math.radians(lat2)
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlon / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _azimuth(lat1, lon1, lat2, lon2):
+    rlat1, rlat2 = math.radians(lat1), math.radians(lat2)
+    dlon = math.radians(lon2 - lon1)
+    y = math.sin(dlon) * math.cos(rlat2)
+    x = math.cos(rlat1) * math.sin(rlat2) - math.sin(rlat1) * math.cos(rlat2) * math.cos(dlon)
+    return (math.degrees(math.atan2(y, x)) + 360) % 360
+
+
+def generate_demo_db(db_path: str, stations_file: str = "config/stations.txt"):
+    """Insert demo events into the CSS3.0 database."""
+    _ensure_css30_schema(db_path)
+    conn = sqlite3.connect(db_path)
+    now = time.time()
+
+    evid = int(conn.execute("SELECT COALESCE(MAX(evid),0) FROM event").fetchone()[0]) + 1
+    orid = int(conn.execute("SELECT COALESCE(MAX(orid),0) FROM origin").fetchone()[0]) + 1
+    arid = int(conn.execute("SELECT COALESCE(MAX(arid),0) FROM arrival").fetchone()[0]) + 1
+    magid = int(conn.execute("SELECT COALESCE(MAX(magid),0) FROM netmag").fetchone()[0]) + 1
+
+    for i, demo in enumerate(DEMO_EVENTS):
+        ev_time = demo["time"] if demo["time"] else now - random.uniform(600, 86400)
+        st_file = demo.get("stations_file", stations_file)
+        stations = parse_stations(st_file)
+        if not stations:
+            stations = parse_stations(stations_file)
+
+        # Sort stations by distance, pick closest ones
+        for s in stations:
+            s["dist"] = _haversine(demo["lat"], demo["lon"], s["latitude"], s["longitude"])
+        stations.sort(key=lambda s: s["dist"])
+        used = stations[:min(12, len(stations))]
+
+        conn.execute(
+            "INSERT INTO event (evid, evname, prefor, lddate) VALUES (?,?,?,?)",
+            (evid, demo["name"], orid, now),
+        )
+        conn.execute(
+            "INSERT INTO origin (orid, evid, lat, lon, depth, time, nass, ndef, "
+            "dtype, algorithm, auth, lddate) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (orid, evid, demo["lat"], demo["lon"], demo["depth"], ev_time,
+             len(used), len(used), "f", "geiger", "demo", now),
+        )
+        conn.execute(
+            "INSERT INTO origerr (orid, smajax, sminax, sdepth, stime, conf, lddate) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (orid, 2.5, 1.8, 3.0, 0.5, 0.90, now),
+        )
+        conn.execute(
+            "INSERT INTO netmag (magid, net, orid, evid, magtype, nsta, magnitude, "
+            "uncertainty, auth, lddate) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (magid, "XX", orid, evid, demo["magtype"], len(used),
+             demo["mag"], 0.2, "demo", now),
+        )
+
+        for s in used:
+            dist_km = s["dist"]
+            az = _azimuth(demo["lat"], demo["lon"], s["latitude"], s["longitude"])
+            p_tt = dist_km / 6.0 + random.gauss(0, 0.3)
+            arr_time = ev_time + p_tt
+            residual = random.gauss(0, 0.15)
+            snr = max(3, demo["mag"] * 5 - math.log10(max(dist_km, 1)) * 3 + random.gauss(0, 2))
+
+            conn.execute(
+                "INSERT INTO arrival (arid, sta, time, chan, iphase, snr, auth, lddate) "
+                "VALUES (?,?,?,?,?,?,?,?)",
+                (arid, s["station"], arr_time, "BHZ", "P", snr, "demo", now),
+            )
+            conn.execute(
+                "INSERT INTO assoc (arid, orid, sta, phase, delta, seaz, timeres, "
+                "vmodel, lddate) VALUES (?,?,?,?,?,?,?,?,?)",
+                (arid, orid, s["station"], "P", dist_km, az, residual, "iasp91", now),
+            )
+            arid += 1
+
+        evid += 1
+        orid += 1
+        magid += 1
+
+    conn.commit()
+    conn.close()
+    return len(DEMO_EVENTS)
+
+
+@app.post("/api/demo")
+async def api_load_demo():
+    """Populate the database with demo events for map testing."""
+    db_path = CONFIG["db_file"]
+    st_file = CONFIG["stations_file"]
+    count = generate_demo_db(db_path, st_file)
+    events = query_events_from_db(db_path, limit=50)
+    stats = get_db_stats(db_path)
+    stations = parse_stations(st_file)
+    stats["station_count"] = len(stations)
+    await manager.broadcast({
+        "type": "events_update",
+        "events": events,
+        "stats": stats,
+    })
+    return {"status": "ok", "events_added": count}
+
+
+@app.post("/api/run-simulation")
+async def api_run_simulation():
+    """Run the C++ simulator binary if available."""
+    build_dir = CONFIG["build_dir"]
+    sim_path = os.path.join(build_dir, "realdetect_sim")
+    if not os.path.isfile(sim_path):
+        sim_path = "realdetect_sim"
+    try:
+        result = subprocess.run(
+            [sim_path], capture_output=True, text=True, timeout=30,
+            cwd=build_dir if os.path.isdir(build_dir) else ".",
+        )
+        return {
+            "status": "ok",
+            "returncode": result.returncode,
+            "stdout": result.stdout[-2000:] if result.stdout else "",
+            "stderr": result.stderr[-1000:] if result.stderr else "",
+        }
+    except FileNotFoundError:
+        return {"status": "error", "message": "Simulator binary not found. Build the project first."}
+    except subprocess.TimeoutExpired:
+        return {"status": "error", "message": "Simulation timed out."}
 
 
 # ---------------------------------------------------------------------------

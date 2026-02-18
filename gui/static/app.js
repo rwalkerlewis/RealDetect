@@ -523,6 +523,59 @@ setInterval(function () {
 }, 30000);
 
 // ---------------------------------------------------------------------------
+// Actions: demo events, simulation, refresh
+// ---------------------------------------------------------------------------
+
+function setActionStatus(text) {
+  document.getElementById("action-status").textContent = text;
+}
+
+function loadDemo() {
+  var btn = document.getElementById("btn-demo");
+  btn.disabled = true;
+  setActionStatus("Loading demo events...");
+  fetch("/api/demo", { method: "POST" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      setActionStatus("Loaded " + (data.events_added || 0) + " demo events.");
+      btn.disabled = false;
+    })
+    .catch(function (err) {
+      setActionStatus("Error: " + err.message);
+      btn.disabled = false;
+    });
+}
+
+function runSimulation() {
+  var btn = document.getElementById("btn-sim");
+  btn.disabled = true;
+  setActionStatus("Running C++ simulator...");
+  fetch("/api/run-simulation", { method: "POST" })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.status === "ok") {
+        setActionStatus("Simulation complete (exit " + data.returncode + ").");
+      } else {
+        setActionStatus(data.message || "Simulation failed.");
+      }
+      btn.disabled = false;
+    })
+    .catch(function (err) {
+      setActionStatus("Error: " + err.message);
+      btn.disabled = false;
+    });
+}
+
+function requestRefresh() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: "refresh" }));
+    setActionStatus("Refreshed.");
+  } else {
+    setActionStatus("Not connected.");
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", function () {

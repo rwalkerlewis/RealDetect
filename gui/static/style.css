@@ -351,6 +351,77 @@ select:focus { outline: 1px solid var(--accent); }
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* ---- Buttons ---- */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-light); }
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text);
+}
+.btn-secondary:hover { background: #2c3040; border-color: var(--accent); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.action-status {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  min-height: 16px;
+}
+
+/* ---- Map legend ---- */
+.map-legend {
+  position: absolute;
+  bottom: 30px;
+  right: 12px;
+  background: rgba(26,29,38,0.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  z-index: 1000;
+  font-size: 11px;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+}
+.map-legend h4 {
+  margin: 0 0 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  color: var(--text);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.legend-event { border: 1px solid rgba(255,255,255,0.3); }
+
 /* Pulse animation for new events */
 @keyframes pulse-ring {
   0% { transform: scale(1); opacity: 0.8; }

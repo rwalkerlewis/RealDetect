@@ -72,6 +72,17 @@
       </div>
     </section>
 
+    <!-- Actions -->
+    <section class="panel" id="actions-panel">
+      <h2>Actions</h2>
+      <div class="action-buttons">
+        <button id="btn-demo" class="btn btn-primary" onclick="loadDemo()">Load Demo Events</button>
+        <button id="btn-sim" class="btn btn-secondary" onclick="runSimulation()">Run Simulation</button>
+        <button id="btn-refresh" class="btn btn-secondary" onclick="requestRefresh()">Refresh</button>
+      </div>
+      <div id="action-status" class="action-status"></div>
+    </section>
+
     <!-- Event list -->
     <section class="panel" id="events-panel">
       <h2>Recent Events</h2>
@@ -80,7 +91,27 @@
   </aside>
 
   <!-- Map container -->
-  <div id="map"></div>
+  <div id="map">
+    <!-- Legend overlay -->
+    <div id="map-legend" class="map-legend">
+      <h4>Legend</h4>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#4e9af1;"></span> Station
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot legend-event" style="background:#3ddc84;"></span> M &lt; 2
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot legend-event" style="background:#ffb833;width:12px;height:12px;"></span> M 2–4
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot legend-event" style="background:#ff8833;width:16px;height:16px;"></span> M 4–6
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot legend-event" style="background:#f05050;width:20px;height:20px;"></span> M &ge; 6
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Event detail popup (hidden by default) -->
