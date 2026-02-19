@@ -33,7 +33,7 @@ void GridSearchLocator::setParameter(const std::string& name, double value) {
 
 void GridSearchLocator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 LocationResult GridSearchLocator::locate(const std::vector<PickPtr>& picks,
@@ -188,21 +188,47 @@ double GridSearchLocator::computeRMS(double lat, double lon, double depth,
 
 GeoPoint GridSearchLocator::estimateInitialLocation(const std::vector<PickPtr>& picks,
                                                       const StationInventory& stations) const {
-    double sum_lat = 0, sum_lon = 0;
-    int count = 0;
+    // Find the station with the earliest P arrival — the event is near that station
+    TimePoint earliest;
+    StationPtr earliest_sta;
+    bool found_earliest = false;
     
     for (const auto& pick : picks) {
+        if (pick->phase_type != PhaseType::P && pick->phase_type != PhaseType::Pg &&
+            pick->phase_type != PhaseType::Pn) continue;
         auto sta = stations.getStation(pick->stream_id);
-        if (sta) {
-            sum_lat += sta->latitude();
-            sum_lon += sta->longitude();
-            count++;
+        if (!sta) continue;
+        if (!found_earliest || pick->time < earliest) {
+            earliest = pick->time;
+            earliest_sta = sta;
+            found_earliest = true;
         }
     }
     
-    if (count == 0) return GeoPoint(0, 0, default_depth_);
+    if (found_earliest && earliest_sta) {
+        // Use the earliest station's location as initial estimate
+        return GeoPoint(earliest_sta->latitude(), earliest_sta->longitude(), default_depth_);
+    }
     
-    return GeoPoint(sum_lat / count, sum_lon / count, default_depth_);
+    // Fallback: weighted centroid (weight by inverse pick time order)
+    double sum_lat = 0, sum_lon = 0, sum_w = 0;
+    std::vector<std::pair<TimePoint, StationPtr>> sorted_picks;
+    for (const auto& pick : picks) {
+        auto sta = stations.getStation(pick->stream_id);
+        if (sta) sorted_picks.push_back({pick->time, sta});
+    }
+    std::sort(sorted_picks.begin(), sorted_picks.end(),
+        [](auto& a, auto& b) { return a.first < b.first; });
+    
+    for (size_t i = 0; i < sorted_picks.size(); i++) {
+        double w = 1.0 / (1.0 + i);  // Higher weight for earlier arrivals
+        sum_lat += sorted_picks[i].second->latitude() * w;
+        sum_lon += sorted_picks[i].second->longitude() * w;
+        sum_w += w;
+    }
+    
+    if (sum_w > 0) return GeoPoint(sum_lat / sum_w, sum_lon / sum_w, default_depth_);
+    return GeoPoint(0, 0, default_depth_);
 }
 
 TimePoint GridSearchLocator::estimateOriginTime(const GeoPoint& location,
@@ -255,7 +281,7 @@ void OctTreeLocator::setParameter(const std::string& name, double value) {
 
 void OctTreeLocator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 void OctTreeLocator::setSearchBounds(double lat_min, double lat_max,

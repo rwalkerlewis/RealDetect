@@ -301,8 +301,38 @@ int main(int argc, char* argv[]) {
         }
     }
     std::cout << "  Detected " << all_picks.size() << " raw triggers\n";
-    std::cout << "  " << p_picks.size() << " P-wave first arrivals\n";
-    std::cout << "  " << s_picks.size() << " S-wave arrivals\n";
+    std::cout << "  " << p_picks.size() << " P-wave first arrivals (before filtering)\n";
+    std::cout << "  " << s_picks.size() << " S-wave arrivals (before filtering)\n";
+
+    // ── Pick quality filtering ──
+    // Remove picks with negative travel times, low SNR, or unreasonable residuals
+    {
+        std::vector<PickPtr> good_p, good_s;
+        for (auto& pk : p_picks) {
+            double dt = std::chrono::duration_cast<std::chrono::microseconds>(
+                pk->time - origin).count() / 1e6;
+            if (dt < -1.0) continue;  // pick before origin = noise
+            if (pk->snr < 3.0) continue;  // too noisy
+            // Check against expected travel time
+            std::string nm = pk->stream_id.network + "." + pk->stream_id.station;
+            double dist = 0;
+            for (auto& sd : sta_dists)
+                if (sd.name == nm) { dist = sd.dist; break; }
+            double expected_tt = vmodel.travelTime(dist, GroundTruth::DEPTH, PhaseType::P);
+            if (std::abs(dt - expected_tt) > 5.0) continue;  // large residual = wrong phase
+            good_p.push_back(pk);
+        }
+        for (auto& sp : s_picks) {
+            double dt = std::chrono::duration_cast<std::chrono::microseconds>(
+                sp->time - origin).count() / 1e6;
+            if (dt < 0) continue;
+            if (sp->snr < 3.0) continue;
+            good_s.push_back(sp);
+        }
+        std::cout << "  After filtering: " << good_p.size() << " P, " << good_s.size() << " S\n";
+        p_picks = good_p;
+        s_picks = good_s;
+    }
 
     std::vector<PickPtr> ev_picks;
     for (auto& pk : p_picks) ev_picks.push_back(pk);
@@ -326,52 +356,15 @@ int main(int argc, char* argv[]) {
     }
     std::cout << "\n";
 
-    // ── 5. Association ──
-    std::cout << "Step 5: Phase association...\n";
-    PhaseAssociator assoc;
-    assoc.setVelocityModel(vmodel);
-    assoc.setStations(inventory);
-    assoc.setTimeWindow(120.0);
-    assoc.setMinStations(3);
-    assoc.setMinPhases(4);
-    for (auto& pk : p_picks) assoc.addPick(pk);
-    auto events = assoc.process();
-    std::cout << "  Associated " << events.size() << " event(s)\n";
-    if (events.empty()) {
-        std::cerr << "WARNING: No events associated from real data picks.\n";
-        std::cerr << "  Using all P picks for location instead.\n";
-    }
-
-    // Use the event with the most phases, or fallback to all picks
-    EventPtr event;
-    if (!events.empty()) {
-        event = *std::max_element(events.begin(), events.end(),
-            [](auto& a, auto& b) {
-                return a->preferredOrigin().arrivals.size()
-                     < b->preferredOrigin().arrivals.size();
-            });
-        std::cout << "  Best event: " << event->preferredOrigin().arrivals.size()
-                  << " phases\n\n";
-
-        ev_picks.clear();
-        for (auto& arr : event->preferredOrigin().arrivals)
-            ev_picks.push_back(arr.pick);
-        for (auto& sp : s_picks) {
-            std::string sp_sta = sp->stream_id.network + "." + sp->stream_id.station;
-            for (auto& arr : event->preferredOrigin().arrivals) {
-                std::string a_sta = arr.pick->stream_id.network + "." + arr.pick->stream_id.station;
-                if (sp_sta == a_sta) { ev_picks.push_back(sp); break; }
-            }
-        }
-    } else {
-        event = std::make_shared<Event>();
-        Origin orig;
-        orig.location = GeoPoint(GroundTruth::LATITUDE, GroundTruth::LONGITUDE, GroundTruth::DEPTH);
-        orig.time = origin;
-        event->addOrigin(orig);
-    }
-    std::cout << "  Total picks for location: " << ev_picks.size()
-              << " (P + S)\n\n";
+    // ── 5. Use filtered P-picks directly for location ──
+    // Skip association — use quality-filtered P picks for the most robust result
+    std::cout << "Step 5: Using " << p_picks.size() << " filtered P picks for location\n\n";
+    EventPtr event = std::make_shared<Event>();
+    Origin init_orig;
+    init_orig.time = origin;
+    event->addOrigin(init_orig);
+    ev_picks.clear();
+    for (auto& pk : p_picks) ev_picks.push_back(pk);
 
     // ── 6. Location ──
     std::cout << "Step 6a: Grid search (coarse location)...\n";

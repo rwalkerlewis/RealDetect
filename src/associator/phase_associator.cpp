@@ -73,7 +73,7 @@ PhaseAssociator::PhaseAssociator()
 
 void PhaseAssociator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 void PhaseAssociator::addPick(PickPtr pick) {
@@ -281,7 +281,7 @@ NucleatorAssociator::NucleatorAssociator()
 
 void NucleatorAssociator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 void NucleatorAssociator::setGrid(double lat_min, double lat_max, double lat_step,

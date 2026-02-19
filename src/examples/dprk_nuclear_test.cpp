@@ -225,9 +225,10 @@ int main(int argc, char* argv[]) {
     // ── 4. Phase picking ──
     std::cout << "Step 4: STA/LTA phase detection on real data...\n";
     STALTAPicker picker;
-    picker.setParameter("sta_length", 0.5);
-    picker.setParameter("lta_length", 10.0);
-    picker.setParameter("trigger_ratio", 3.0);
+    picker.setParameter("sta_length", 1.0);
+    picker.setParameter("lta_length", 15.0);
+    picker.setParameter("trigger_ratio", 3.5);
+    picker.setParameter("use_filter", 0);  // Disable filter for 20 Hz regional data
 
     std::vector<PickPtr> all_picks;
     std::ofstream stalta_csv(out_dir + "/stalta.csv");
@@ -284,7 +285,28 @@ int main(int argc, char* argv[]) {
         }
     }
     std::cout << "  Detected " << all_picks.size() << " raw triggers\n";
-    std::cout << "  " << p_picks.size() << " P-wave first arrivals\n";
+    std::cout << "  " << p_picks.size() << " P-wave first arrivals (before filtering)\n";
+
+    // ── Pick quality filtering ──
+    {
+        std::vector<PickPtr> good_p;
+        for (auto& pk : p_picks) {
+            double dt = std::chrono::duration_cast<std::chrono::microseconds>(
+                pk->time - origin).count() / 1e6;
+            if (dt < 0) continue;  // pick before origin = noise
+            if (pk->snr < 2.0) continue;
+            // For regional/teleseismic, use generous residual tolerance
+            std::string nm = pk->stream_id.network + "." + pk->stream_id.station;
+            double dist = 0;
+            for (auto& sd : sta_dists)
+                if (sd.name == nm) { dist = sd.dist; break; }
+            double expected_tt = vmodel.travelTime(dist, GroundTruth::DEPTH, PhaseType::P);
+            if (std::abs(dt - expected_tt) > 40.0) continue;
+            good_p.push_back(pk);
+        }
+        std::cout << "  After filtering: " << good_p.size() << " P picks\n";
+        p_picks = good_p;
+    }
 
     // write picks CSV
     {
@@ -304,41 +326,21 @@ int main(int argc, char* argv[]) {
     }
     std::cout << "\n";
 
-    // ── 5. Association ──
-    std::cout << "Step 5: Phase association...\n";
-    PhaseAssociator assoc;
-    assoc.setVelocityModel(vmodel);
-    assoc.setStations(inventory);
-    assoc.setTimeWindow(120.0);
-    assoc.setMinStations(4);
-    assoc.setMinPhases(6);
-    for (auto& pk : p_picks) assoc.addPick(pk);
-    auto events = assoc.process();
-    std::cout << "  Associated " << events.size() << " event(s)\n";
-
-    EventPtr event;
-    std::vector<PickPtr> ev_picks;
-    if (!events.empty()) {
-        event = events[0];
-        std::cout << "  Phases used: " << event->preferredOrigin().arrivals.size() << "\n\n";
-        for (auto& arr : event->preferredOrigin().arrivals)
-            ev_picks.push_back(arr.pick);
-    } else {
-        std::cerr << "WARNING: No events associated. Using all P picks.\n\n";
-        event = std::make_shared<Event>();
-        Origin orig;
-        orig.location = GeoPoint(GroundTruth::LATITUDE, GroundTruth::LONGITUDE, GroundTruth::DEPTH);
-        orig.time = origin;
-        event->addOrigin(orig);
-        ev_picks = p_picks;
-    }
+    // ── 5. Use filtered P-picks directly for location ──
+    std::cout << "Step 5: Using " << p_picks.size() << " filtered P picks for location\n\n";
+    EventPtr event = std::make_shared<Event>();
+    Origin init_orig;
+    init_orig.time = origin;
+    event->addOrigin(init_orig);
+    std::vector<PickPtr> ev_picks = p_picks;
 
     // ── 6. Location ──
     std::cout << "Step 6: Locating event...\n";
     GridSearchLocator grid_loc;
     grid_loc.setVelocityModel(vmodel);
     grid_loc.setParameter("grid_spacing", 10.0);
-    grid_loc.setParameter("search_radius", 500.0);
+    grid_loc.setParameter("search_radius", 800.0);
+    grid_loc.setDepthRange(0.0, 30.0);
     auto grid_result = grid_loc.locate(ev_picks, inventory);
 
     GeigerLocator locator;

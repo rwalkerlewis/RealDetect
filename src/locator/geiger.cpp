@@ -28,7 +28,7 @@ void GeigerLocator::setParameter(const std::string& name, double value) {
 
 void GeigerLocator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 LocationResult GeigerLocator::locate(const std::vector<PickPtr>& picks,
@@ -406,7 +406,7 @@ void NonLinLocLocator::setParameter(const std::string& name, double value) {
 
 void NonLinLocLocator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 LocationResult NonLinLocLocator::locate(const std::vector<PickPtr>& picks,
