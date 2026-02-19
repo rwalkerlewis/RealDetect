@@ -66,7 +66,7 @@ def main():
                 print(f"  {net}.{sta}: no metadata, skipping")
                 continue
 
-            st = client.get_waveforms(net, sta, "*", "BHZ", t_start, t_end)
+            st = client.get_waveforms(net, sta, "*", "BH?", t_start, t_end)
             if len(st) == 0:
                 print(f"  {net}.{sta}: no waveform data, skipping")
                 continue

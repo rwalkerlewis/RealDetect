@@ -72,8 +72,8 @@ def fetch_station_info(client, network, station, t):
 
 
 def fetch_waveform(client, network, station, t_start, t_end):
-    """Fetch waveform data, trying BHZ then HHZ."""
-    for chan in ["BHZ", "HHZ"]:
+    """Fetch 3-component waveform data (BH? = BHZ+BHN+BHE or BH1+BH2)."""
+    for chan in ["BH?", "HH?"]:
         try:
             st = client.get_waveforms(network, station, "*", chan, t_start, t_end)
             if len(st) > 0:
