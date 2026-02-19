@@ -79,6 +79,7 @@ set(PICKER_SOURCES
     src/picker/stalta_picker.cpp
     src/picker/aic_picker.cpp
     src/picker/ml_picker.cpp
+    src/picker/polarization_picker.cpp
     src/picker/characteristic_function.cpp
     src/picker/filter_bank.cpp
 )

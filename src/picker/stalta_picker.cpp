@@ -28,13 +28,14 @@ std::vector<PickResult> STALTAPicker::pick(const Waveform& waveform) {
     double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
     for (auto& s : data) s -= mean;
     
-    // Bandpass filter to remove long-period noise and high-frequency noise
-    if (use_filter_ && filter_low_ > 0 && filter_high_ > 0 &&
-        filter_high_ < waveform.sampleRate() / 2.0 &&
-        data.size() > 100) {
-        auto bp = IIRFilter::butterworth(2, filter_low_, filter_high_,
-                                          waveform.sampleRate());
-        data = bp.filtfilt(data);
+    // Bandpass filter (cap at 80% Nyquist for stability)
+    if (use_filter_ && filter_low_ > 0 && filter_high_ > 0 && data.size() > 100) {
+        double nyquist = waveform.sampleRate() / 2.0;
+        double hi = std::min(filter_high_, nyquist * 0.80);
+        if (hi > filter_low_) {
+            auto bp = IIRFilter::butterworth(2, filter_low_, hi, waveform.sampleRate());
+            data = bp.filtfilt(data);
+        }
     }
     
     // Compute STA/LTA ratio
@@ -192,13 +193,14 @@ SampleVector STALTAPicker::characteristicFunction(const Waveform& waveform) cons
     double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
     for (auto& s : data) s -= mean;
     
-    // Apply same bandpass filter as pick()
-    if (use_filter_ && filter_low_ > 0 && filter_high_ > 0 &&
-        filter_high_ < waveform.sampleRate() / 2.0 &&
-        data.size() > 100) {
-        auto bp = IIRFilter::butterworth(2, filter_low_, filter_high_,
-                                          waveform.sampleRate());
-        data = bp.filtfilt(data);
+    // Apply same bandpass filter as pick() (cap at 80% Nyquist)
+    if (use_filter_ && filter_low_ > 0 && filter_high_ > 0 && data.size() > 100) {
+        double nyquist = waveform.sampleRate() / 2.0;
+        double hi = std::min(filter_high_, nyquist * 0.80);
+        if (hi > filter_low_) {
+            auto bp = IIRFilter::butterworth(2, filter_low_, hi, waveform.sampleRate());
+            data = bp.filtfilt(data);
+        }
     }
     
     return computeSTALTA(data, waveform.sampleRate());
