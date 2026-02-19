@@ -42,3 +42,13 @@ Testing/
 
 # Database files
 *.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Docker
+data/
+output/ridgecrest/ridgecrest.db

@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  # ── Development environment ───────────────────────────────────────
+  # Mounts source code, rebuilds on start, serves the web GUI.
+  # Usage:  docker compose up dev
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache:/app/build
+      - data:/app/data
+    environment:
+      - REALDETECT_STATIONS=/app/src_mount/config/stations.txt
+      - REALDETECT_CONFIG=/app/src_mount/config/realdetect.conf
+      - REALDETECT_DB=/app/data/realdetect_catalog.db
+      - REALDETECT_BUILD_DIR=/app/build
+    stdin_open: true
+    tty: true
+
+  # ── Production-like build ─────────────────────────────────────────
+  # Multi-stage build; self-contained image.
+  # Usage:  docker compose up app
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - data:/app/data
+    environment:
+      - REALDETECT_STATIONS=/app/config/stations.txt
+      - REALDETECT_CONFIG=/app/config/realdetect.conf
+      - REALDETECT_DB=/app/data/realdetect_catalog.db
+
+  # ── Run tests only ────────────────────────────────────────────────
+  # Usage:  docker compose run --rm test
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache:/app/build
+    entrypoint: /bin/bash
+    command: >
+      -c "
+        mkdir -p /app/build && cd /app/build &&
+        cmake /app/src_mount -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON &&
+        make -j$$(nproc) &&
+        ./realdetect_tests
+      "
+
+volumes:
+  build-cache:
+  data:
