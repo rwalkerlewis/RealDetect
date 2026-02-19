@@ -51,3 +51,4 @@ __pycache__/
 
 # Docker
 data/
+output/ridgecrest/ridgecrest.db

@@ -141,8 +141,15 @@ target_link_libraries(realdetect realdetect_core)
 add_executable(realdetect_sim src/simulator.cpp)
 target_link_libraries(realdetect_sim realdetect_core)
 
+# Examples
+add_executable(ridgecrest_example src/examples/ridgecrest_earthquake.cpp)
+target_link_libraries(ridgecrest_example realdetect_core)
+
+add_executable(dprk_example src/examples/dprk_nuclear_test.cpp)
+target_link_libraries(dprk_example realdetect_core)
+
 # Install targets
-install(TARGETS realdetect realdetect_sim
+install(TARGETS realdetect realdetect_sim ridgecrest_example dprk_example
     RUNTIME DESTINATION bin
 )
 
