@@ -1,0 +1,9 @@
+config,latitude,longitude,depth_km,rms_s,error_km,num_picks,magnitude
+STA/LTA(nofilt) + SoCal + Grid,35.7076,-117.473,0,1.70632,13.3059,7,7.49336
+STA/LTA(nofilt) + SoCal + Grd+Gei,35.7076,-117.473,0,1.70632,13.3059,7,7.49336
+STA/LTA+AIC + SoCal + Grd+Geiger,35.7076,-117.473,0,1.70632,13.3059,7,7.49336
+STA/LTA(nofilt) + IASP91 + Grd+Gei,35.7127,-117.43,0,1.57331,16.5306,7,7.53655
+STA/LTA(nofilt) + AK135 + Grd+Gei,35.7127,-117.43,0,1.57331,16.5306,7,7.53655
+Tight params + SoCal + Grd+Geiger,35.7076,-117.473,0,1.70632,13.3059,7,7.49336
+STA/LTA(nofilt) + SoCal + OctTree,36.0323,-117.48,49,3.2092,31.0766,7,7.07817
+USGS_Truth,35.77,-117.599,8,0,0,0,7.1

@@ -1,0 +1,9 @@
+config,latitude,longitude,depth_km,rms_s,error_km,num_picks,magnitude
+STA/LTA + Korea + Grid,40.2683,143.906,30,7.09755,1255.7,3,8.0975
+STA/LTA + Korea + Grid+Geiger,40.2683,143.906,30,7.09755,1255.7,3,8.0975
+STA/LTA+AIC + Korea + Grid+Gei,40.2683,143.906,30,7.12158,1255.7,3,8.0975
+STA/LTA + IASP91 + Grid+Geiger,40.3934,143.91,30,7.22122,1253.61,3,8.39424
+STA/LTA + AK135 + Grid+Geiger,40.2683,143.906,25,7.1388,1255.7,3,8.11833
+Loose filter + Korea + Grid+Gei,39.5625,143.845,25,5.90675,1266.92,3,-1
+STA/LTA + Korea + OctTree,40.2683,143.906,30,7.09755,1255.7,3,8.0975
+USGS_Truth,41.343,129.036,0.5,0,0,0,6.3
