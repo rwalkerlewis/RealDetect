@@ -1,23 +1,30 @@
 /**
- * RealDetect Simulator
- * 
- * Generates synthetic seismic waveforms for testing the processing system.
- * Creates realistic P and S wave arrivals with noise.
+ * RealDetect Data Playback
+ *
+ * Plays back real seismic waveform data from MiniSEED files
+ * through the full processing pipeline.
+ *
+ * Usage:
+ *   realdetect_sim [data_dir]
+ *   realdetect_sim data/ridgecrest
+ *   realdetect_sim data/dprk
  */
 
 #include <iostream>
-#include <random>
-#include <chrono>
-#include <thread>
-#include <cmath>
-#include <fstream>
 #include <iomanip>
+#include <cmath>
+#include <vector>
+#include <map>
+#include <set>
+#include <chrono>
+#include <algorithm>
 
 #include "realdetect/core/types.hpp"
 #include "realdetect/core/waveform.hpp"
 #include "realdetect/core/station.hpp"
 #include "realdetect/core/event.hpp"
 #include "realdetect/core/velocity_model.hpp"
+#include "realdetect/core/miniseed.hpp"
 #include "realdetect/picker/stalta_picker.hpp"
 #include "realdetect/picker/aic_picker.hpp"
 #include "realdetect/associator/phase_associator.hpp"
@@ -27,344 +34,174 @@
 
 using namespace realdetect;
 
-class SeismicSimulator {
-public:
-    SeismicSimulator() : gen_(std::random_device{}()) {
-        velocity_model_ = VelocityModel1D::simpleThreeLayer();
+void runPlayback(const std::string& data_dir) {
+    std::cout << "========================================\n"
+              << "RealDetect — Real Data Playback\n"
+              << "========================================\n\n";
+
+    // Load station inventory
+    std::string sta_file = data_dir + "/stations.txt";
+    StationInventory stations;
+    if (!stations.loadFromFile(sta_file)) {
+        std::cerr << "ERROR: Cannot load stations from " << sta_file << "\n";
+        return;
     }
-    
-    // Generate synthetic event
-    void generateEvent(double lat, double lon, double depth, double magnitude) {
-        event_lat_ = lat;
-        event_lon_ = lon;
-        event_depth_ = depth;
-        event_mag_ = magnitude;
-        event_time_ = std::chrono::system_clock::now();
-        
-        std::cout << "\n=== Generating synthetic event ===" << std::endl;
-        std::cout << "Location: " << lat << "°N, " << lon << "°E, " << depth << " km" << std::endl;
-        std::cout << "Magnitude: " << magnitude << std::endl;
-    }
-    
-    // Generate waveform for a station
-    WaveformPtr generateWaveform(const Station& station, double sample_rate = 100.0,
-                                   double duration = 120.0) {
-        GeoPoint event_loc(event_lat_, event_lon_, event_depth_);
-        double distance = event_loc.distanceTo(station.location());
-        
-        // Calculate travel times
-        double vp = 6.0, vs = 3.5;  // km/s
-        double hypo_dist = std::sqrt(distance * distance + event_depth_ * event_depth_);
-        double p_time = hypo_dist / vp;
-        double s_time = hypo_dist / vs;
-        
-        // Create waveform
-        StreamID id(station.network(), station.code(), "00", "BHZ");
-        auto waveform = std::make_shared<Waveform>(id, sample_rate, event_time_);
-        
-        size_t n_samples = static_cast<size_t>(duration * sample_rate);
-        SampleVector& data = waveform->data();
-        data.resize(n_samples);
-        
-        // Generate noise background
-        std::normal_distribution<> noise(0.0, 100.0);
-        for (auto& s : data) {
-            s = noise(gen_);
-        }
-        
-        // Add P-wave arrival
-        size_t p_idx = static_cast<size_t>(p_time * sample_rate);
-        if (p_idx < n_samples) {
-            addArrival(data, p_idx, sample_rate, 
-                       getPAmplitude(distance, event_mag_),
-                       5.0,   // Dominant frequency
-                       2.0);  // Duration
-        }
-        
-        // Add S-wave arrival
-        size_t s_idx = static_cast<size_t>(s_time * sample_rate);
-        if (s_idx < n_samples) {
-            addArrival(data, s_idx, sample_rate,
-                       getSAmplitude(distance, event_mag_),
-                       2.5,   // Dominant frequency
-                       5.0);  // Duration
-        }
-        
-        // Add some surface waves for larger events
-        if (event_mag_ > 4.0 && distance > 100) {
-            double surface_time = distance / 3.0;  // ~3 km/s
-            size_t surf_idx = static_cast<size_t>(surface_time * sample_rate);
-            if (surf_idx < n_samples) {
-                addArrival(data, surf_idx, sample_rate,
-                           getSAmplitude(distance, event_mag_) * 1.5,
-                           0.1,   // Low frequency
-                           15.0); // Long duration
-            }
-        }
-        
-        std::cout << "Station " << station.code() 
-                  << ": distance=" << distance << " km"
-                  << ", P=" << p_time << "s, S=" << s_time << "s" << std::endl;
-        
-        return waveform;
-    }
-    
-    // Create example station network
-    StationInventory createTestNetwork() {
-        StationInventory inventory;
-        
-        // Create a network around Southern California
-        double center_lat = 34.0;
-        double center_lon = -118.0;
-        
-        std::vector<std::pair<double, double>> offsets = {
-            {0.0, 0.0},
-            {0.5, 0.3},
-            {-0.4, 0.6},
-            {0.3, -0.5},
-            {-0.6, -0.3},
-            {0.8, 0.1},
-            {-0.2, 0.9},
-            {0.6, 0.7}
-        };
-        
-        int i = 1;
-        for (const auto& [dlat, dlon] : offsets) {
-            std::string code = "S" + std::to_string(i);
-            auto sta = std::make_shared<Station>("CI", code,
-                center_lat + dlat, center_lon + dlon, 100.0);
-            
+    // Add BHZ channel
+    for (auto& [key, sta] : stations.stations()) {
+        if (!sta->getChannel("BHZ")) {
             Channel bhz;
             bhz.code = "BHZ";
-            bhz.sample_rate = 100.0;
-            bhz.dip = -90.0;
+            bhz.sample_rate = 40.0;
+            bhz.dip = -90;
             sta->addChannel(bhz);
-            
-            Channel bhn;
-            bhn.code = "BHN";
-            bhn.sample_rate = 100.0;
-            bhn.azimuth = 0.0;
-            bhn.dip = 0.0;
-            sta->addChannel(bhn);
-            
-            Channel bhe;
-            bhe.code = "BHE";
-            bhe.sample_rate = 100.0;
-            bhe.azimuth = 90.0;
-            bhe.dip = 0.0;
-            sta->addChannel(bhe);
-            
-            inventory.addStation(sta);
-            i++;
-        }
-        
-        return inventory;
-    }
-
-private:
-    std::mt19937 gen_;
-    VelocityModel1D velocity_model_;
-    
-    double event_lat_, event_lon_, event_depth_, event_mag_;
-    TimePoint event_time_;
-    
-    void addArrival(SampleVector& data, size_t start_idx, double sample_rate,
-                     double amplitude, double freq, double duration) {
-        size_t n_samples = static_cast<size_t>(duration * sample_rate);
-        double dt = 1.0 / sample_rate;
-        
-        for (size_t i = 0; i < n_samples && start_idx + i < data.size(); i++) {
-            double t = i * dt;
-            
-            // Ricker wavelet envelope
-            double sigma = 1.0 / (2.0 * M_PI * freq);
-            double env = (1.0 - 0.5 * t / duration) * std::exp(-t * t / (4 * sigma * sigma));
-            
-            // Oscillation
-            double osc = std::sin(2.0 * M_PI * freq * t);
-            
-            // Add some randomness
-            std::normal_distribution<> noise(0.0, 0.1);
-            double phase_noise = noise(gen_);
-            
-            data[start_idx + i] += amplitude * env * std::sin(2.0 * M_PI * freq * t + phase_noise);
         }
     }
-    
-    double getPAmplitude(double distance, double magnitude) {
-        // Simplified amplitude-distance-magnitude relationship
-        // log(A) = M - 1.66*log(D) - 2.0
-        double log_amp = magnitude - 1.66 * std::log10(distance) - 2.0;
-        return std::pow(10.0, log_amp) * 1e6;  // Convert to counts
-    }
-    
-    double getSAmplitude(double distance, double magnitude) {
-        // S-wave amplitude typically 1.5-2x P-wave
-        return getPAmplitude(distance, magnitude) * 1.7;
-    }
-};
+    std::cout << "Loaded " << stations.size() << " stations\n";
 
-void runSimulation() {
-    std::cout << "========================================" << std::endl;
-    std::cout << "SeisProc Simulator - Testing Processing" << std::endl;
-    std::cout << "========================================" << std::endl;
-    
-    SeismicSimulator sim;
-    
-    // Create test network
-    StationInventory stations = sim.createTestNetwork();
-    std::cout << "\nCreated network with " << stations.size() << " stations" << std::endl;
-    
-    // Generate a synthetic event
-    sim.generateEvent(34.2, -117.8, 12.0, 4.5);
-    
-    // Generate waveforms for all stations
-    std::vector<WaveformPtr> waveforms;
-    for (const auto& [key, sta] : stations.stations()) {
-        waveforms.push_back(sim.generateWaveform(*sta));
+    // Load MiniSEED waveforms
+    std::string mseed_file = data_dir + "/waveforms.mseed";
+    MiniSeedReader reader;
+    if (!reader.open(mseed_file)) {
+        std::cerr << "ERROR: Cannot load MiniSEED from " << mseed_file << "\n";
+        return;
     }
-    
-    // Initialize processing components
+    auto waveforms_vec = reader.toWaveforms();
+
+    std::map<StreamID, WaveformPtr> waveforms;
+    for (auto& wf : waveforms_vec) {
+        if (wf->streamId().channel == "BHZ")
+            waveforms[wf->streamId()] = wf;
+    }
+    std::cout << "Loaded " << waveforms.size() << " waveforms from MiniSEED\n\n";
+
+    if (waveforms.empty()) {
+        std::cerr << "ERROR: No BHZ waveforms found\n";
+        return;
+    }
+
+    // Use default velocity model
     VelocityModel1D velocity_model = VelocityModel1D::simpleThreeLayer();
-    
+
+    // Pick phases
+    std::cout << "=== Phase Picking ===\n";
     STALTAPicker picker;
     picker.setParameter("sta_length", 0.5);
     picker.setParameter("lta_length", 10.0);
     picker.setParameter("trigger_ratio", 3.0);
-    
-    PhaseAssociator associator;
-    associator.setStations(stations);
-    associator.setVelocityModel(velocity_model);
-    associator.setMinStations(3);
-    associator.setMinPhases(4);
-    
-    GeigerLocator locator;
-    locator.setVelocityModel(velocity_model);
-    locator.setMaxIterations(20);
-    
-    // Process waveforms
-    std::cout << "\n=== Phase Picking ===" << std::endl;
-    
+
     std::vector<PickPtr> all_picks;
-    
-    for (const auto& waveform : waveforms) {
-        auto picks = picker.pick(*waveform);
-        
-        for (const auto& pick_result : picks) {
+    for (const auto& [id, wf] : waveforms) {
+        auto picks = picker.pick(*wf);
+        for (const auto& pr : picks) {
             auto pick = std::make_shared<Pick>();
-            pick->stream_id = waveform->streamId();
-            pick->time = pick_result.time;
-            pick->phase_type = pick_result.phase_type;
-            pick->snr = pick_result.snr;
-            pick->amplitude = pick_result.amplitude;
+            pick->stream_id = id;
+            pick->time = pr.time;
+            pick->phase_type = pr.phase_type;
+            pick->snr = pr.snr;
+            pick->amplitude = pr.amplitude;
             pick->is_automatic = true;
             pick->method = "STA/LTA";
-            pick->quality = PickQuality::Emergent;
-            
+            pick->quality = pr.snr > 8.0 ? PickQuality::Impulsive : PickQuality::Emergent;
             std::cout << "Pick: " << pick->stream_id.toString()
                       << " " << phaseTypeToString(pick->phase_type)
-                      << " SNR=" << pick->snr << std::endl;
-            
+                      << " SNR=" << std::setprecision(1) << pick->snr << "\n";
             all_picks.push_back(pick);
-            associator.addPick(pick);
         }
     }
-    
-    // Associate picks into events
-    std::cout << "\n=== Event Association ===" << std::endl;
-    
-    auto events = associator.process();
-    std::cout << "Found " << events.size() << " events" << std::endl;
-    
-    // Locate events
-    std::cout << "\n=== Event Location ===" << std::endl;
-    
-    for (auto& event : events) {
-        std::vector<PickPtr> event_picks;
-        for (const auto& arr : event->preferredOrigin().arrivals) {
-            event_picks.push_back(arr.pick);
+
+    // Keep first arrival per station
+    std::vector<PickPtr> p_picks;
+    std::set<std::string> seen;
+    std::sort(all_picks.begin(), all_picks.end(),
+              [](auto& a, auto& b){ return a->time < b->time; });
+    for (auto& pk : all_picks) {
+        std::string key = pk->stream_id.network + "." + pk->stream_id.station;
+        if (seen.insert(key).second) {
+            pk->phase_type = PhaseType::P;
+            p_picks.push_back(pk);
         }
-        
-        auto result = locator.locate(event_picks, stations);
-        
-        if (result.converged) {
-            event->origins().back() = result.origin;
-            
-            std::cout << "\nLocated event:" << std::endl;
-            std::cout << "  Location: " << result.origin.location.latitude << "°N, "
-                      << result.origin.location.longitude << "°E" << std::endl;
-            std::cout << "  Depth: " << result.origin.location.depth << " km" << std::endl;
-            std::cout << "  RMS: " << result.origin.rms << " s" << std::endl;
-            std::cout << "  Phases: " << result.origin.phase_count << std::endl;
-            std::cout << "  Stations: " << result.origin.station_count << std::endl;
-            std::cout << "  Quality: " << result.origin.qualityCode() << std::endl;
-            std::cout << "  Iterations: " << result.iterations << std::endl;
-            
-            // Compare with true location
-            std::cout << "\n  True location: 34.200°N, -117.800°E, 12.0 km" << std::endl;
-            std::cout << "  Latitude error: " 
-                      << std::abs(result.origin.location.latitude - 34.2) << "°" << std::endl;
-            std::cout << "  Longitude error: "
-                      << std::abs(result.origin.location.longitude - (-117.8)) << "°" << std::endl;
-            std::cout << "  Depth error: "
-                      << std::abs(result.origin.location.depth - 12.0) << " km" << std::endl;
-        } else {
-            std::cout << "Location failed to converge" << std::endl;
-        }
-        
-        // Calculate magnitude
-        std::cout << "\n=== Magnitude Calculation ===" << std::endl;
-        
-        std::map<StreamID, WaveformPtr> wf_map;
-        for (const auto& wf : waveforms) {
-            wf_map[wf->streamId()] = wf;
-        }
-        
-        LocalMagnitude ml_calc;
-        auto ml_result = ml_calc.calculate(result.origin, wf_map, stations);
-        
-        if (ml_result.station_count > 0) {
-            event->addMagnitude(Magnitude(MagnitudeType::ML, ml_result.value,
-                                           ml_result.uncertainty, ml_result.station_count));
-            
-            std::cout << "  ML: " << ml_result.value
-                      << " ± " << ml_result.uncertainty
-                      << " (" << ml_result.station_count << " stations)" << std::endl;
-            std::cout << "  True magnitude: 4.5" << std::endl;
-        }
-        
-        // Print event summary
-        std::cout << "\n" << event->summary() << std::endl;
     }
-    
-    std::cout << "\n========================================" << std::endl;
-    std::cout << "Simulation complete" << std::endl;
-    std::cout << "========================================" << std::endl;
+    std::cout << "\n" << p_picks.size() << " P-wave first arrivals\n";
+
+    // Associate
+    std::cout << "\n=== Event Association ===\n";
+    PhaseAssociator assoc;
+    assoc.setStations(stations);
+    assoc.setVelocityModel(velocity_model);
+    assoc.setMinStations(3);
+    assoc.setMinPhases(4);
+    for (const auto& pick : p_picks) assoc.addPick(pick);
+    auto events = assoc.process();
+    std::cout << "Found " << events.size() << " events\n";
+
+    // Locate
+    std::cout << "\n=== Event Location ===\n";
+    std::vector<PickPtr> loc_picks = p_picks;
+    if (!events.empty()) {
+        auto event = events[0];
+        loc_picks.clear();
+        for (const auto& arr : event->preferredOrigin().arrivals)
+            loc_picks.push_back(arr.pick);
+    }
+
+    GridSearchLocator gs;
+    gs.setVelocityModel(velocity_model);
+    gs.setParameter("grid_spacing", 5.0);
+    gs.setParameter("search_radius", 300.0);
+    auto result = gs.locate(loc_picks, stations);
+
+    if (result.converged) {
+        std::cout << "\nLocated event:\n"
+                  << "  Location: " << std::setprecision(3)
+                  << result.origin.location.latitude << "°N, "
+                  << result.origin.location.longitude << "°E\n"
+                  << "  Depth: " << std::setprecision(1) << result.origin.location.depth << " km\n"
+                  << "  RMS: " << result.origin.rms << " s\n"
+                  << "  Phases: " << result.origin.phase_count << "\n"
+                  << "  Stations: " << result.origin.station_count << "\n"
+                  << "  Quality: " << result.origin.qualityCode() << "\n";
+    } else {
+        std::cout << "Location failed to converge\n";
+    }
+
+    // Magnitude
+    std::cout << "\n=== Magnitude Calculation ===\n";
+    LocalMagnitude ml_calc;
+    auto ml = ml_calc.calculate(result.origin, waveforms, stations);
+    if (ml.station_count > 0) {
+        std::cout << "  ML: " << std::setprecision(2) << ml.value
+                  << " ± " << ml.uncertainty
+                  << " (" << ml.station_count << " stations)\n";
+    } else {
+        std::cout << "  No magnitude calculated\n";
+    }
+
+    std::cout << "\n========================================\n"
+              << "Playback complete\n"
+              << "========================================\n";
 }
 
 void printUsage(const char* progname) {
-    std::cout << "SeisProc Simulator\n\n";
-    std::cout << "Generates synthetic seismic events for testing.\n\n";
-    std::cout << "Usage: " << progname << " [options]\n\n";
-    std::cout << "Options:\n";
-    std::cout << "  -m, --magnitude <M>    Event magnitude (default: 4.5)\n";
-    std::cout << "  -d, --depth <km>       Event depth (default: 12.0)\n";
-    std::cout << "  --lat <degrees>        Event latitude (default: 34.2)\n";
-    std::cout << "  --lon <degrees>        Event longitude (default: -117.8)\n";
-    std::cout << "  -h, --help             Show this help\n";
+    std::cout << "RealDetect Data Playback\n\n"
+              << "Plays back real seismic data through the processing pipeline.\n\n"
+              << "Usage: " << progname << " [data_dir]\n\n"
+              << "Arguments:\n"
+              << "  data_dir    Directory containing waveforms.mseed and stations.txt\n"
+              << "              (default: data/ridgecrest)\n\n"
+              << "Examples:\n"
+              << "  " << progname << " data/ridgecrest\n"
+              << "  " << progname << " data/dprk\n";
 }
 
 int main(int argc, char* argv[]) {
-    // Parse command line
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
-        if (arg == "-h" || arg == "--help") {
-            printUsage(argv[0]);
-            return 0;
-        }
+    if (argc > 1 && (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help")) {
+        printUsage(argv[0]);
+        return 0;
     }
-    
-    runSimulation();
-    
+
+    std::string data_dir = "data/ridgecrest";
+    if (argc > 1) data_dir = argv[1];
+
+    runPlayback(data_dir);
     return 0;
 }
