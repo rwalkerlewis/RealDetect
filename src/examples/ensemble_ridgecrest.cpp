@@ -34,6 +34,7 @@
 #include "realdetect/core/miniseed.hpp"
 #include "realdetect/picker/stalta_picker.hpp"
 #include "realdetect/picker/aic_picker.hpp"
+#include "realdetect/picker/polarization_picker.hpp"
 #include "realdetect/locator/grid_search.hpp"
 #include "realdetect/locator/geiger.hpp"
 #include "realdetect/magnitude/local_magnitude.hpp"
@@ -51,6 +52,7 @@ struct PipelineConfig {
     double filter_low, filter_high;
     bool use_filter;
     bool aic_refine;
+    bool use_polarization;      // use 3C polarization-coupled picker
     std::string model_name;
     std::string locator_name;   // "grid", "grid+geiger", "octtree"
 };
@@ -87,34 +89,73 @@ static PipelineResult runPipeline(
     PipelineResult res{};
     auto vmodel = getModel(cfg.model_name);
 
-    // Pick
-    STALTAPicker picker;
-    picker.setParameter("sta_length", cfg.sta);
-    picker.setParameter("lta_length", cfg.lta);
-    picker.setParameter("trigger_ratio", cfg.trigger);
-    picker.setParameter("filter_low", cfg.filter_low);
-    picker.setParameter("filter_high", cfg.filter_high);
-    picker.setParameter("use_filter", cfg.use_filter ? 1.0 : 0.0);
-
-    AICPicker aic;
-
-    std::vector<PickPtr> all_picks;
+    // Group waveforms by station for 3C access
+    struct Station3C { WaveformPtr z, n, e; };
+    std::map<std::string, Station3C> station_wfs;
     for (auto& [sid, wf] : waveforms) {
-        auto picks = picker.pick(*wf);
-        for (auto& pr : picks) {
-            size_t pick_idx = pr.sample_index;
-            // AIC refinement if requested
-            if (cfg.aic_refine && wf->sampleCount() > 200) {
-                pick_idx = aic.refinePick(*wf, pr.sample_index, 100);
+        std::string key = sid.network + "." + sid.station;
+        if (sid.channel == "BHZ") station_wfs[key].z = wf;
+        else if (sid.channel == "BHN" || sid.channel == "BH1") station_wfs[key].n = wf;
+        else if (sid.channel == "BHE" || sid.channel == "BH2") station_wfs[key].e = wf;
+    }
+
+    // Pick — either STA/LTA or Polarization
+    std::vector<PickPtr> all_picks;
+
+    if (cfg.use_polarization) {
+        PolarizationPicker pol;
+        pol.setParameter("sta_length", cfg.sta);
+        pol.setParameter("lta_length", cfg.lta);
+        pol.setParameter("trigger_ratio", cfg.trigger);
+        pol.setParameter("filter_low", cfg.filter_low);
+        pol.setParameter("filter_high", cfg.filter_high);
+        pol.setParameter("use_filter", cfg.use_filter ? 1.0 : 0.0);
+
+        for (auto& [key, s3c] : station_wfs) {
+            std::vector<PickResult> picks;
+            if (s3c.z && s3c.n && s3c.e) {
+                picks = pol.pick3C(*s3c.z, *s3c.n, *s3c.e);
+            } else if (s3c.z) {
+                picks = pol.pick(*s3c.z);  // fallback 1C
             }
-            auto p = std::make_shared<Pick>();
-            p->stream_id = sid;
-            p->time = wf->timeAt(pick_idx);
-            p->phase_type = PhaseType::P;
-            p->snr = pr.snr;
-            p->amplitude = pr.amplitude;
-            p->is_automatic = true;
-            all_picks.push_back(p);
+            for (auto& pr : picks) {
+                auto p = std::make_shared<Pick>();
+                p->stream_id = s3c.z ? s3c.z->streamId() : StreamID();
+                p->time = pr.time;
+                p->phase_type = PhaseType::P;
+                p->snr = pr.snr;
+                p->amplitude = pr.amplitude;
+                p->is_automatic = true;
+                all_picks.push_back(p);
+            }
+        }
+    } else {
+        STALTAPicker picker;
+        picker.setParameter("sta_length", cfg.sta);
+        picker.setParameter("lta_length", cfg.lta);
+        picker.setParameter("trigger_ratio", cfg.trigger);
+        picker.setParameter("filter_low", cfg.filter_low);
+        picker.setParameter("filter_high", cfg.filter_high);
+        picker.setParameter("use_filter", cfg.use_filter ? 1.0 : 0.0);
+
+        AICPicker aic;
+
+        for (auto& [sid, wf] : waveforms) {
+            if (sid.channel != "BHZ") continue;  // only pick on Z
+            auto picks = picker.pick(*wf);
+            for (auto& pr : picks) {
+                size_t pick_idx = pr.sample_index;
+                if (cfg.aic_refine && wf->sampleCount() > 200)
+                    pick_idx = aic.refinePick(*wf, pr.sample_index, 100);
+                auto p = std::make_shared<Pick>();
+                p->stream_id = sid;
+                p->time = wf->timeAt(pick_idx);
+                p->phase_type = PhaseType::P;
+                p->snr = pr.snr;
+                p->amplitude = pr.amplitude;
+                p->is_automatic = true;
+                all_picks.push_back(p);
+            }
         }
     }
 
@@ -224,13 +265,16 @@ int main(int argc, char* argv[]) {
     auto wfs = reader.toWaveforms();
     std::map<StreamID, WaveformPtr> waveforms;
     std::vector<std::pair<std::string, double>> sta_dists;
+    std::set<std::string> seen_stas;
     GeoPoint evt(Truth::LAT, Truth::LON);
     for (auto& wf : wfs) {
-        if (wf->streamId().channel != "BHZ") continue;
-        waveforms[wf->streamId()] = wf;
-        auto sta = inventory.getStation(wf->streamId());
-        double d = sta ? sta->distanceTo(evt) : 0;
-        sta_dists.push_back({wf->streamId().network + "." + wf->streamId().station, d});
+        waveforms[wf->streamId()] = wf;  // keep ALL channels (Z, N, E)
+        std::string key = wf->streamId().network + "." + wf->streamId().station;
+        if (wf->streamId().channel == "BHZ" && seen_stas.insert(key).second) {
+            auto sta = inventory.getStation(wf->streamId());
+            double d = sta ? sta->distanceTo(evt) : 0;
+            sta_dists.push_back({key, d});
+        }
     }
 
     // Origin time
@@ -244,14 +288,16 @@ int main(int argc, char* argv[]) {
               << inventory.size() << " stations\n\n";
 
     // Define configurations
+    //                                          sta  lta  trig  flo  fhi   filt  aic   pol    model    locator
     std::vector<PipelineConfig> configs = {
-        {"STA/LTA(nofilt) + SoCal + Grid",     0.3, 8.0, 2.5, 1.0, 15.0, false, false, "socal", "grid"},
-        {"STA/LTA(nofilt) + SoCal + Grd+Gei",  0.3, 8.0, 2.5, 1.0, 15.0, false, false, "socal", "grid+geiger"},
-        {"STA/LTA+AIC + SoCal + Grd+Geiger",   0.3, 8.0, 2.5, 1.0, 15.0, false, true,  "socal", "grid+geiger"},
-        {"STA/LTA(nofilt) + IASP91 + Grd+Gei", 0.3, 8.0, 2.5, 1.0, 15.0, false, false, "iasp91", "grid+geiger"},
-        {"STA/LTA(nofilt) + AK135 + Grd+Gei",  0.3, 8.0, 2.5, 1.0, 15.0, false, false, "ak135", "grid+geiger"},
-        {"Tight params + SoCal + Grd+Geiger",   0.5, 10.0, 3.5, 2.0, 10.0, false, false, "socal", "grid+geiger"},
-        {"STA/LTA(nofilt) + SoCal + OctTree",   0.3, 8.0, 2.5, 1.0, 15.0, false, false, "socal", "octtree"},
+        {"STA/LTA + SoCal + Grid",              0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "socal",  "grid"},
+        {"STA/LTA + SoCal + Grid+Geiger",       0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "socal",  "grid+geiger"},
+        {"STA/LTA+AIC + SoCal + Grid+Geiger",   0.3, 8.0, 2.5, 1.0, 15.0, false, true,  false, "socal",  "grid+geiger"},
+        {"STA/LTA + IASP91 + Grid+Geiger",      0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "iasp91", "grid+geiger"},
+        {"STA/LTA + AK135 + Grid+Geiger",       0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "ak135",  "grid+geiger"},
+        {"STA/LTA+Pol + SoCal + Grid+Geiger",   0.3, 8.0, 1.5, 1.0, 15.0, true,  false, true,  "socal",  "grid+geiger"},
+        {"STA/LTA+Pol + IASP91 + Grid+Geiger",  0.3, 8.0, 1.5, 1.0, 15.0, true,  false, true,  "iasp91", "grid+geiger"},
+        {"STA/LTA + SoCal + OctTree",            0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "socal",  "octtree"},
     };
 
     // Run all configurations

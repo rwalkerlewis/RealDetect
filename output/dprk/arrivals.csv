@@ -1,4 +1,1 @@
 station,phase,distance_km,azimuth,residual_s,weight,used
-IC.MDJ,P,1267.92,297.118,-0.000798,0.5625,1
-KS.BUS2,P,1412.91,251.443,-6.8258,0.25,1
-KS.SEO2,P,1500.07,263.595,10.2242,0.25,1

@@ -1,4 +1,2 @@
 station,phase,travel_time_s,snr,quality,distance_km
-IC.MDJ,P,44.8695,13.4007,1,366.929
-KS.BUS2,P,56.1695,7.95015,2,677.699
-KS.SEO2,P,84.2195,5.40292,2,465.054
+KS.SEO2,P,26.9695,7.19331,2,465.054
