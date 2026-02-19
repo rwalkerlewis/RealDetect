@@ -295,8 +295,8 @@ int main(int argc, char* argv[]) {
         {"STA/LTA+AIC + SoCal + Grid+Geiger",   0.3, 8.0, 2.5, 1.0, 15.0, false, true,  false, "socal",  "grid+geiger"},
         {"STA/LTA + IASP91 + Grid+Geiger",      0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "iasp91", "grid+geiger"},
         {"STA/LTA + AK135 + Grid+Geiger",       0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "ak135",  "grid+geiger"},
-        {"STA/LTA+Pol + SoCal + Grid+Geiger",   0.3, 8.0, 1.5, 1.0, 15.0, true,  false, true,  "socal",  "grid+geiger"},
-        {"STA/LTA+Pol + IASP91 + Grid+Geiger",  0.3, 8.0, 1.5, 1.0, 15.0, true,  false, true,  "iasp91", "grid+geiger"},
+        {"STA/LTA+Pol + SoCal + Grid+Geiger",   0.3, 8.0, 1.0, 1.0, 15.0, false,  false, true,  "socal",  "grid+geiger"},
+        {"STA/LTA+Pol + IASP91 + Grid+Geiger",  0.3, 8.0, 1.0, 1.0, 15.0, false,  false, true,  "iasp91", "grid+geiger"},
         {"STA/LTA + SoCal + OctTree",            0.3, 8.0, 2.5, 1.0, 15.0, false, false, false, "socal",  "octtree"},
     };
 

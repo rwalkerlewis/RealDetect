@@ -226,7 +226,8 @@ int main(int argc, char* argv[]) {
     STALTAPicker picker;
     picker.setParameter("sta_length", 0.3);
     picker.setParameter("lta_length", 8.0);
-    picker.setParameter("trigger_ratio", 2.5);  // Lower threshold for real noisy data
+    picker.setParameter("trigger_ratio", 2.5);
+    picker.setParameter("use_filter", 0);  // Raw data — filter was causing issues
 
     std::vector<PickPtr> all_picks;
     std::ofstream stalta_csv(out_dir + "/stalta.csv");

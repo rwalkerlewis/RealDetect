@@ -11,8 +11,8 @@ STALTAPicker::STALTAPicker()
     , trigger_ratio_(3.0)
     , detrigger_ratio_(1.5)
     , filter_low_(1.0)
-    , filter_high_(20.0)
-    , use_filter_(true)
+    , filter_high_(15.0)
+    , use_filter_(false)
 {
 }
 
