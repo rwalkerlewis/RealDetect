@@ -25,8 +25,8 @@ EVENT_DEPTH_KM = 0.5
 EVENT_MAG = 6.3
 
 # ── Data windows ─────────────────────────────────────────────────
-PRE_ORIGIN = 15.0
-POST_ORIGIN = 180.0
+PRE_ORIGIN = 60.0   # 60s pre-event for stable LTA baseline
+POST_ORIGIN = 240.0
 
 # ── Output ───────────────────────────────────────────────────────
 OUT_DIR = sys.argv[1] if len(sys.argv) > 1 else "data/dprk"

@@ -27,6 +27,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <vector>
 #include <map>
@@ -223,89 +224,100 @@ int main(int argc, char* argv[]) {
     }
 
     // ── 4. Phase picking ──
-    std::cout << "Step 4: STA/LTA phase detection on real data...\n";
-    STALTAPicker picker;
-    picker.setParameter("sta_length", 1.0);
-    picker.setParameter("lta_length", 15.0);
-    picker.setParameter("trigger_ratio", 3.5);
-    picker.setParameter("use_filter", 0);  // Disable filter for 20 Hz regional data
+    // Try loading Python-generated picks first (better quality for regional data)
+    // Fall back to C++ STA/LTA with predicted-pick selection
+    std::vector<PickPtr> p_picks;
+    std::string pypicks_file = data_dir + "/picks_python.csv";
+    std::ifstream pyf(pypicks_file);
+    if (pyf.is_open()) {
+        std::cout << "Step 4: Loading picks from ObsPy multi-method picker...\n";
+        std::string header_line;
+        std::getline(pyf, header_line);  // skip header
+        std::string line;
+        while (std::getline(pyf, line)) {
+            if (line.empty()) continue;
+            // Parse: station,phase,travel_time_s,snr,quality,distance_km,method
+            std::istringstream iss(line);
+            std::string sta_name, phase_str, method;
+            double tt, snr, dist;
+            int quality;
+            char comma;
+            std::getline(iss, sta_name, ',');
+            std::getline(iss, phase_str, ',');
+            iss >> tt >> comma >> snr >> comma >> quality >> comma >> dist >> comma;
+            std::getline(iss, method);
 
-    std::vector<PickPtr> all_picks;
-    std::ofstream stalta_csv(out_dir + "/stalta.csv");
-    stalta_csv << "station,distance_km,sample,ratio\n";
+            // Find matching waveform stream ID
+            StreamID sid;
+            size_t dot = sta_name.find('.');
+            if (dot != std::string::npos) {
+                sid.network = sta_name.substr(0, dot);
+                sid.station = sta_name.substr(dot + 1);
+                sid.channel = "BHZ";
+            }
 
-    for (auto& [sid, wf] : waveforms) {
-        auto ratio = picker.characteristicFunction(*wf);
-
-        double dist = 0;
-        for (auto& sd : sta_dists)
-            if (sd.name == sid.network + "." + sid.station) { dist = sd.dist; break; }
-
-        if (dist < 800 && dist > 0) {
-            double sr = wf->sampleRate();
-            double start_off = std::chrono::duration_cast<std::chrono::microseconds>(
-                wf->startTime() - origin).count() / 1e6;
-            int nsamp = static_cast<int>(ratio.size());
-            int lo = std::max(0, static_cast<int>((-start_off - 2) * sr));
-            int hi = std::min(nsamp, static_cast<int>((-start_off + 40) * sr));
-            for (int i = lo; i < hi; i += 2)
-                stalta_csv << sid.network << "." << sid.station << "," << dist << ","
-                           << (start_off + i / sr) << "," << ratio[i] << "\n";
-        }
-
-        auto picks = picker.pick(*wf);
-        for (auto& pr : picks) {
             auto p = std::make_shared<Pick>();
             p->stream_id = sid;
-            p->time = pr.time;
+            p->time = origin + std::chrono::microseconds(static_cast<int64_t>(tt * 1e6));
             p->phase_type = PhaseType::P;
-            p->snr = pr.snr;
-            p->amplitude = pr.amplitude;
+            p->snr = snr;
             p->is_automatic = true;
-            p->method = "STA/LTA";
-            if (pr.snr >= 20) p->quality = PickQuality::Impulsive;
-            else if (pr.snr >= 10) p->quality = PickQuality::Emergent;
-            else p->quality = PickQuality::Questionable;
-            all_picks.push_back(p);
+            p->method = "ObsPy-" + method;
+            p->quality = snr >= 5 ? PickQuality::Impulsive : PickQuality::Emergent;
+            p_picks.push_back(p);
+
+            std::cout << "    " << sta_name << ": tt=" << std::setprecision(1) << tt
+                      << "s, SNR=" << snr << " (" << method << ")\n";
         }
-    }
-    stalta_csv.close();
+        std::cout << "  Loaded " << p_picks.size() << " picks from " << pypicks_file << "\n";
+    } else {
+        std::cout << "Step 4: C++ STA/LTA phase detection (run scripts/pick_dprk.py for better picks)...\n";
+        STALTAPicker picker;
+        picker.setParameter("sta_length", 1.0);
+        picker.setParameter("lta_length", 15.0);
+        picker.setParameter("trigger_ratio", 3.5);
+        picker.setParameter("use_filter", 0);
 
-    std::sort(all_picks.begin(), all_picks.end(),
-              [](auto& a, auto& b){ return a->time < b->time; });
-
-    // First arrival per station
-    std::vector<PickPtr> p_picks;
-    std::set<std::string> seen;
-    for (auto& pk : all_picks) {
-        std::string key = pk->stream_id.network + "." + pk->stream_id.station;
-        if (seen.insert(key).second) {
-            pk->phase_type = PhaseType::P;
-            p_picks.push_back(pk);
+        std::vector<PickPtr> all_picks;
+        for (auto& [sid, wf] : waveforms) {
+            auto picks = picker.pick(*wf);
+            for (auto& pr : picks) {
+                auto p = std::make_shared<Pick>();
+                p->stream_id = sid;
+                p->time = pr.time;
+                p->phase_type = PhaseType::P;
+                p->snr = pr.snr;
+                p->amplitude = pr.amplitude;
+                p->is_automatic = true;
+                all_picks.push_back(p);
+            }
         }
-    }
-    std::cout << "  Detected " << all_picks.size() << " raw triggers\n";
-    std::cout << "  " << p_picks.size() << " P-wave first arrivals (before filtering)\n";
-
-    // ── Pick quality filtering ──
-    {
-        std::vector<PickPtr> good_p;
-        for (auto& pk : p_picks) {
-            double dt = std::chrono::duration_cast<std::chrono::microseconds>(
-                pk->time - origin).count() / 1e6;
-            if (dt < 0) continue;  // pick before origin = noise
-            if (pk->snr < 2.0) continue;
-            // For regional/teleseismic, use generous residual tolerance
-            std::string nm = pk->stream_id.network + "." + pk->stream_id.station;
+        // Predicted-pick selection
+        std::map<std::string, std::vector<PickPtr>> picks_by_sta;
+        for (auto& pk : all_picks) {
+            std::string key = pk->stream_id.network + "." + pk->stream_id.station;
+            picks_by_sta[key].push_back(pk);
+        }
+        for (auto& [sta_name, sta_picks] : picks_by_sta) {
             double dist = 0;
             for (auto& sd : sta_dists)
-                if (sd.name == nm) { dist = sd.dist; break; }
+                if (sd.name == sta_name) { dist = sd.dist; break; }
+            if (dist <= 0) continue;
             double expected_tt = vmodel.travelTime(dist, GroundTruth::DEPTH, PhaseType::P);
-            if (std::abs(dt - expected_tt) > 40.0) continue;
-            good_p.push_back(pk);
+            PickPtr best; double best_resid = 1e9;
+            for (auto& pk : sta_picks) {
+                double dt = std::chrono::duration_cast<std::chrono::microseconds>(
+                    pk->time - origin).count() / 1e6;
+                if (dt < 0 || pk->snr < 2.0) continue;
+                double resid = std::abs(dt - expected_tt);
+                if (resid < best_resid) { best_resid = resid; best = pk; }
+            }
+            if (best && best_resid < 25.0) {
+                best->phase_type = PhaseType::P;
+                p_picks.push_back(best);
+            }
         }
-        std::cout << "  After filtering: " << good_p.size() << " P picks\n";
-        p_picks = good_p;
+        std::cout << "  Selected " << p_picks.size() << " P picks\n";
     }
 
     // write picks CSV
