@@ -1,0 +1,12 @@
+parameter,computed,truth,error
+latitude,44.2387,41.343,2.89575
+longitude,120.559,129.036,-8.47683
+depth,50,0.5,49.5
+magnitude,6.3,6.3,0
+epicentral_error_km,762.472,,
+rms_s,37.8405,,
+gap_deg,147.548,,
+num_phases,11,,
+num_stations,11,,
+converged,0,,
+iterations,3,,
