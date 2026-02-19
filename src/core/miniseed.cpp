@@ -84,13 +84,15 @@ bool MiniSeedRecord::parse(const uint8_t* data, size_t length) {
     int16_t multiplier = (data[34] << 8) | data[35];
     
     if (factor > 0 && multiplier > 0) {
-        sample_rate_ = factor * multiplier;
+        sample_rate_ = static_cast<double>(factor) * multiplier;
     } else if (factor > 0 && multiplier < 0) {
-        sample_rate_ = -factor / multiplier;
+        sample_rate_ = -static_cast<double>(factor) / multiplier;
     } else if (factor < 0 && multiplier > 0) {
-        sample_rate_ = -multiplier / factor;
+        sample_rate_ = -static_cast<double>(multiplier) / factor;
+    } else if (factor < 0 && multiplier < 0) {
+        sample_rate_ = 1.0 / (static_cast<double>(factor) * multiplier);
     } else {
-        sample_rate_ = multiplier / factor;
+        sample_rate_ = 0;  // Unknown
     }
     
     // Activity, I/O, data quality flags (bytes 36-38)
@@ -340,21 +342,23 @@ bool MiniSeedReader::parse(const uint8_t* data, size_t length) {
     size_t offset = 0;
     while (offset + 48 < length) {
         MiniSeedRecord record;
+        bool parsed = false;
         
-        // Try different record lengths
-        for (size_t rec_len : {512, 4096, 256, 1024, 2048, 8192}) {
+        // Try different record lengths (most common first)
+        for (size_t rec_len : {4096, 512, 1024, 2048, 8192, 256}) {
             if (offset + rec_len > length) continue;
             
             if (record.parse(data + offset, rec_len)) {
                 records_.push_back(record);
                 offset += rec_len;
+                parsed = true;
                 break;
             }
         }
         
-        // If parsing failed, try to find next record
-        if (records_.empty() || offset == 0) {
-            offset += 256;  // Skip ahead
+        // If parsing failed, skip ahead to find next record
+        if (!parsed) {
+            offset += 256;
         }
     }
     

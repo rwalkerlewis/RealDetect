@@ -79,6 +79,7 @@ set(PICKER_SOURCES
     src/picker/stalta_picker.cpp
     src/picker/aic_picker.cpp
     src/picker/ml_picker.cpp
+    src/picker/polarization_picker.cpp
     src/picker/characteristic_function.cpp
     src/picker/filter_bank.cpp
 )
@@ -148,8 +149,14 @@ target_link_libraries(ridgecrest_example realdetect_core)
 add_executable(dprk_example src/examples/dprk_nuclear_test.cpp)
 target_link_libraries(dprk_example realdetect_core)
 
+add_executable(ensemble_ridgecrest src/examples/ensemble_ridgecrest.cpp)
+target_link_libraries(ensemble_ridgecrest realdetect_core)
+
+add_executable(ensemble_dprk src/examples/ensemble_dprk.cpp)
+target_link_libraries(ensemble_dprk realdetect_core)
+
 # Install targets
-install(TARGETS realdetect realdetect_sim ridgecrest_example dprk_example
+install(TARGETS realdetect realdetect_sim ridgecrest_example dprk_example ensemble_ridgecrest ensemble_dprk
     RUNTIME DESTINATION bin
 )
 

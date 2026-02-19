@@ -1,0 +1,7 @@
+# Test fixture stations (Ridgecrest M7.1 subset)
+# Network Station Latitude Longitude Elevation(m)
+CI CLC 35.8157 -117.5975 775.0
+CI SLA 35.8909 -117.2833 1174.0
+CI SRT 35.6923 -117.7505 667.0
+CI MPM 36.0580 -117.4890 1839.0
+CI WRC2 35.9479 -117.6504 943.0

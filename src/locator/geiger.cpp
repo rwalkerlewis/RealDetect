@@ -28,7 +28,7 @@ void GeigerLocator::setParameter(const std::string& name, double value) {
 
 void GeigerLocator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 LocationResult GeigerLocator::locate(const std::vector<PickPtr>& picks,
@@ -264,7 +264,7 @@ Eigen::VectorXd GeigerLocator::solveSystem(const Eigen::MatrixXd& G,
     int m = G.cols();
     
     // Weight matrix (create diagonal matrix from weights vector)
-    Eigen::MatrixXd W = w.asDiagonal();
+    Eigen::MatrixXd W = Eigen::MatrixXd::asDiagonal(w);
     
     // Normal equations
     Eigen::MatrixXd GtWG = G.transpose() * W * G;
@@ -275,7 +275,7 @@ Eigen::VectorXd GeigerLocator::solveSystem(const Eigen::MatrixXd& G,
     for (int i = 0; i < m; i++) mean_diag += diag(i);
     mean_diag /= m;
     double lambda = damping_factor_ * mean_diag;
-    GtWG.diagonal() += Eigen::VectorXd::Constant(m, lambda);
+    GtWG.addToDiagonal(Eigen::VectorXd::Constant(m, lambda));
     
     Eigen::VectorXd GtWd = G.transpose() * W * d;
     
@@ -303,7 +303,7 @@ void GeigerLocator::computeUncertainties(const Eigen::MatrixXd& G,
                                            double rms,
                                            Origin& origin) {
     // Covariance matrix: sigma^2 * (G'WG)^-1
-    Eigen::MatrixXd W = w.asDiagonal();
+    Eigen::MatrixXd W = Eigen::MatrixXd::asDiagonal(w);
     Eigen::MatrixXd GtWG = G.transpose() * W * G;
     
     Eigen::MatrixXd cov;
@@ -406,7 +406,7 @@ void NonLinLocLocator::setParameter(const std::string& name, double value) {
 
 void NonLinLocLocator::setVelocityModel(const VelocityModel1D& model) {
     velocity_model_ = model;
-    travel_times_.initialize(model, 1000.0, 100.0);
+    travel_times_.initialize(model, 3000.0, 100.0);
 }
 
 LocationResult NonLinLocLocator::locate(const std::vector<PickPtr>& picks,

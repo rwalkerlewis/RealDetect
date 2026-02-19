@@ -11,8 +11,8 @@ STALTAPicker::STALTAPicker()
     , trigger_ratio_(3.0)
     , detrigger_ratio_(1.5)
     , filter_low_(1.0)
-    , filter_high_(20.0)
-    , use_filter_(true)
+    , filter_high_(15.0)
+    , use_filter_(false)
 {
 }
 
@@ -27,6 +27,16 @@ std::vector<PickResult> STALTAPicker::pick(const Waveform& waveform) {
     // Demean
     double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
     for (auto& s : data) s -= mean;
+    
+    // Bandpass filter (cap at 80% Nyquist for stability)
+    if (use_filter_ && filter_low_ > 0 && filter_high_ > 0 && data.size() > 100) {
+        double nyquist = waveform.sampleRate() / 2.0;
+        double hi = std::min(filter_high_, nyquist * 0.80);
+        if (hi > filter_low_) {
+            auto bp = IIRFilter::butterworth(2, filter_low_, hi, waveform.sampleRate());
+            data = bp.filtfilt(data);
+        }
+    }
     
     // Compute STA/LTA ratio
     SampleVector cf = computeSTALTA(data, waveform.sampleRate());
@@ -182,6 +192,17 @@ SampleVector STALTAPicker::characteristicFunction(const Waveform& waveform) cons
     SampleVector data = waveform.data();
     double mean = std::accumulate(data.begin(), data.end(), 0.0) / data.size();
     for (auto& s : data) s -= mean;
+    
+    // Apply same bandpass filter as pick() (cap at 80% Nyquist)
+    if (use_filter_ && filter_low_ > 0 && filter_high_ > 0 && data.size() > 100) {
+        double nyquist = waveform.sampleRate() / 2.0;
+        double hi = std::min(filter_high_, nyquist * 0.80);
+        if (hi > filter_low_) {
+            auto bp = IIRFilter::butterworth(2, filter_low_, hi, waveform.sampleRate());
+            data = bp.filtfilt(data);
+        }
+    }
+    
     return computeSTALTA(data, waveform.sampleRate());
 }
 

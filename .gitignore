@@ -50,5 +50,11 @@ __pycache__/
 .env
 
 # Docker
-data/
+
+# Keep real EarthScope data in data/ (fetched by scripts/fetch_*.py)
+# but ignore any temporary or generated files
+!data/
+!data/**
+data/*.tmp
+
 output/ridgecrest/ridgecrest.db

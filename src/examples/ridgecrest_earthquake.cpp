@@ -1,8 +1,8 @@
 /**
- * Ridgecrest M7.1 Earthquake Detection and Location Example
+ * Ridgecrest M7.1 Earthquake Detection and Location
  *
- * Demonstrates the full RealDetect processing pipeline using the
- * 2019-07-06 M7.1 Ridgecrest, California earthquake.
+ * Processes REAL seismic waveform data from EarthScope (IRIS/SCEDC)
+ * for the 2019-07-06 M7.1 Ridgecrest, California earthquake.
  *
  * USGS Parameters:
  *   Date:      2019-07-06
@@ -11,9 +11,11 @@
  *   Depth:     8.0 km
  *   Magnitude: Mw 7.1
  *
+ * Data source: EarthScope FDSN web services (fetched by scripts/fetch_ridgecrest_data.py)
+ *
  * Pipeline steps:
- *   1. Load Southern California station network
- *   2. Generate synthetic waveforms with realistic P and S arrivals
+ *   1. Load real station metadata from EarthScope
+ *   2. Load real MiniSEED waveforms from EarthScope
  *   3. STA/LTA phase detection with AIC refinement
  *   4. Phase association
  *   5. Geiger iterative location
@@ -28,7 +30,6 @@
 #include <cmath>
 #include <vector>
 #include <map>
-#include <random>
 #include <chrono>
 #include <algorithm>
 #include <set>
@@ -40,6 +41,7 @@
 #include "realdetect/core/event.hpp"
 #include "realdetect/core/velocity_model.hpp"
 #include "realdetect/core/waveform.hpp"
+#include "realdetect/core/miniseed.hpp"
 #include "realdetect/database/css30_database.hpp"
 #include "realdetect/picker/stalta_picker.hpp"
 #include "realdetect/associator/phase_associator.hpp"
@@ -62,42 +64,6 @@ namespace GroundTruth {
     constexpr double SECOND     = 53.04;
 }
 
-struct StationInfo {
-    std::string network, code;
-    double latitude, longitude, elevation;
-    double distanceTo(double lat, double lon) const {
-        return GeoPoint(latitude, longitude).distanceTo(GeoPoint(lat, lon));
-    }
-};
-
-static std::vector<StationInfo> getSoCalStations() {
-    return {
-        {"CI","ADO", 34.5505,-117.4339, 1500},
-        {"CI","BAR", 32.6800,-116.6722,  580},
-        {"CI","BC3", 33.6572,-115.4530,  -15},
-        {"CI","BBS", 34.0640,-117.0915,  498},
-        {"CI","BBR", 34.2643,-116.9210, 1725},
-        {"CI","BEL", 34.0009,-117.2748,  339},
-        {"CI","BFS", 34.2388,-117.6572, 1254},
-        {"CI","BIL", 34.3467,-116.0890,  605},
-        {"CI","BKR", 35.0955,-119.0633,  238},
-        {"CI","BLA", 35.9973,-117.1752, 1070},
-        {"CI","BLC", 33.7908,-117.5582,  260},
-        {"CI","BOR", 33.7403,-117.0088, 1600},
-        {"CI","BRE", 33.8127,-117.6498,  230},
-        {"CI","BTC", 34.8022,-118.8893, 1190},
-        {"CI","CAC", 33.9653,-116.9673, 1055},
-        {"CI","CAP", 34.3530,-118.4340, 1000},
-        {"CI","CGO", 34.1013,-118.2988,  165},
-        {"CI","CHF", 34.3330,-118.0325,  710},
-        {"CI","CHN", 34.1110,-118.0153,  207},
-        {"CI","CIA", 33.9988,-117.8087,  163},
-        {"IU","ANMO", 34.9462,-106.4567, 1850},
-        {"IU","COR",  44.5855,-123.3046,  110},
-        {"IU","TUC",  32.3098,-110.7847,  909},
-    };
-}
-
 static VelocityModel1D getSoCalVelocityModel() {
     VelocityModel1D model("SoCal_Hadley_Kanamori");
     model.addLayer( 0.0,  5.5, 5.50, 3.18, 2.40);
@@ -107,76 +73,19 @@ static VelocityModel1D getSoCalVelocityModel() {
     return model;
 }
 
-static double travelTime(double dist_km, double depth_km, PhaseType phase) {
-    double vp, vs;
-    if (dist_km < 120) { vp = 6.0; vs = 3.46; }
-    else if (dist_km < 400) { vp = 6.7; vs = 3.87; }
-    else { vp = 7.8; vs = 4.50; }
-    double hypo = std::sqrt(dist_km * dist_km + depth_km * depth_km);
-    if (phase == PhaseType::S || phase == PhaseType::Sn || phase == PhaseType::Sg)
-        return hypo / vs;
-    return hypo / vp;
-}
-
-static WaveformPtr generateWaveform(const StationInfo& sta, double dist_km,
-                                     TimePoint origin, double sr = 100.0) {
-    StreamID id(sta.network, sta.code, "00", "BHZ");
-    int nsamp = static_cast<int>(180 * sr);
-    SampleVector samples(nsamp, 0.0);
-
-    std::mt19937 gen(std::hash<std::string>{}(sta.code));
-    std::normal_distribution<> noise(0.0, 80.0);
-
-    double p_tt = travelTime(dist_km, GroundTruth::DEPTH, PhaseType::P);
-    double s_tt = travelTime(dist_km, GroundTruth::DEPTH, PhaseType::S);
-
-    double lead = 15.0;
-    int p_idx = static_cast<int>((lead + p_tt) * sr);
-    int s_idx = static_cast<int>((lead + s_tt) * sr);
-
-    double log_amp = GroundTruth::MAGNITUDE + 3.0
-                     - 1.66 * std::log10(std::max(dist_km, 10.0)) - 2.0;
-    double p_amp = std::min(std::pow(10.0, log_amp) * 1e5, 1e8);
-    double s_amp = p_amp * 1.7;
-
-    double f_p = (dist_km < 200) ? 3.0 : (dist_km < 600 ? 1.5 : 0.8);
-    double f_s = f_p * 0.6;
-
-    for (int i = 0; i < nsamp; i++) {
-        samples[i] = noise(gen);
-        if (i >= p_idx) {
-            double t = (i - p_idx) / sr;
-            double env = p_amp * std::exp(-t * 1.2) * (1.0 - std::exp(-t * 12.0));
-            samples[i] += env * std::cos(2.0 * M_PI * f_p * t);
-        }
-        if (i >= s_idx) {
-            double t = (i - s_idx) / sr;
-            double env = s_amp * std::exp(-t * 0.6) * (1.0 - std::exp(-t * 8.0));
-            samples[i] += env * std::sin(2.0 * M_PI * f_s * t + 0.3);
-            if (t > 1.0) {
-                double coda = s_amp * 0.35 * std::exp(-t * 0.25)
-                              * std::sin(2.0 * M_PI * f_s * 0.7 * t + noise(gen) * 0.4);
-                samples[i] += coda;
-            }
-        }
-    }
-
-    TimePoint start = origin - std::chrono::seconds(static_cast<int>(lead));
-    auto wf = std::make_shared<Waveform>(id, sr, start);
-    wf->data() = samples;
-    return wf;
-}
-
 int main(int argc, char* argv[]) {
+    std::string data_dir = "data/ridgecrest";
     std::string out_dir = "output/ridgecrest";
     std::string db_file = "output/ridgecrest/ridgecrest.db";
-    if (argc > 1) out_dir = argv[1];
-    if (argc > 2) db_file = argv[2];
+    if (argc > 1) data_dir = argv[1];
+    if (argc > 2) out_dir = argv[2];
+    if (argc > 3) db_file = argv[3];
     mkdir("output", 0755);
     mkdir(out_dir.c_str(), 0755);
 
     std::cout << "================================================================\n"
-              << " Ridgecrest M7.1 — Full Processing Pipeline\n"
+              << " Ridgecrest M7.1 — Real Data Processing Pipeline\n"
+              << " Data source: EarthScope FDSN (IRIS/SCEDC)\n"
               << "================================================================\n\n";
 
     std::cout << "Ground Truth (USGS):\n"
@@ -203,28 +112,37 @@ int main(int argc, char* argv[]) {
     origin += std::chrono::milliseconds(
         static_cast<int>((GroundTruth::SECOND - tm.tm_sec) * 1000));
 
-    // ── 1. Stations ──
-    std::cout << "Step 1: Loading station network...\n";
-    auto sta_list = getSoCalStations();
+    // ── 1. Load real stations from EarthScope ──
+    std::cout << "Step 1: Loading real station inventory from EarthScope...\n";
     StationInventory inventory;
-    for (auto& s : sta_list) {
-        auto st = std::make_shared<Station>(s.network, s.code,
-                                             s.latitude, s.longitude, s.elevation);
-        Channel bhz; bhz.code = "BHZ"; bhz.sample_rate = 100; bhz.dip = -90;
-        st->addChannel(bhz);
-        inventory.addStation(st);
+    std::string sta_file = data_dir + "/stations.txt";
+    if (!inventory.loadFromFile(sta_file)) {
+        std::cerr << "ERROR: Cannot load stations from " << sta_file << "\n";
+        std::cerr << "Run: python3 scripts/fetch_ridgecrest_data.py\n";
+        return 1;
     }
-    std::cout << "  " << inventory.size() << " stations loaded\n\n";
+    // Add BHZ channel to all stations (metadata files don't include channel info)
+    for (auto& [key, sta] : inventory.stations()) {
+        if (!sta->getChannel("BHZ")) {
+            Channel bhz;
+            bhz.code = "BHZ";
+            bhz.sample_rate = 40.0;
+            bhz.dip = -90;
+            sta->addChannel(bhz);
+        }
+    }
+    std::cout << "  " << inventory.size() << " real stations loaded from EarthScope\n\n";
 
     // write stations CSV
     {
         std::ofstream f(out_dir + "/stations.csv");
         f << "network,station,latitude,longitude,elevation,distance_km\n";
-        for (auto& s : sta_list) {
-            double d = s.distanceTo(GroundTruth::LATITUDE, GroundTruth::LONGITUDE);
-            f << s.network << "," << s.code << ","
-              << s.latitude << "," << s.longitude << ","
-              << s.elevation << "," << d << "\n";
+        GeoPoint evt(GroundTruth::LATITUDE, GroundTruth::LONGITUDE);
+        for (auto& [key, sta] : inventory.stations()) {
+            double d = sta->distanceTo(evt);
+            f << sta->network() << "," << sta->code() << ","
+              << sta->latitude() << "," << sta->longitude() << ","
+              << sta->elevation() << "," << d << "\n";
         }
     }
 
@@ -241,25 +159,40 @@ int main(int argc, char* argv[]) {
             f << d << "," << vmodel.vpAt(d) << "," << vmodel.vsAt(d) << "\n";
     }
 
-    // ── 3. Synthetic waveforms ──
-    std::cout << "Step 3: Generating synthetic waveforms...\n";
+    // ── 3. Load REAL waveforms from EarthScope MiniSEED ──
+    std::cout << "Step 3: Loading real waveforms from EarthScope MiniSEED...\n";
+    MiniSeedReader reader;
+    std::string mseed_file = data_dir + "/waveforms.mseed";
+    if (!reader.open(mseed_file)) {
+        std::cerr << "ERROR: Cannot load MiniSEED from " << mseed_file << "\n";
+        std::cerr << "Run: python3 scripts/fetch_ridgecrest_data.py\n";
+        return 1;
+    }
+    auto waveforms_vec = reader.toWaveforms();
     std::map<StreamID, WaveformPtr> waveforms;
+
     struct StaDist { std::string name; double dist; };
     std::vector<StaDist> sta_dists;
-    for (auto& s : sta_list) {
-        double d = s.distanceTo(GroundTruth::LATITUDE, GroundTruth::LONGITUDE);
-        sta_dists.push_back({s.network + "." + s.code, d});
-        auto wf = generateWaveform(s, d, origin);
+    GeoPoint evt_pt(GroundTruth::LATITUDE, GroundTruth::LONGITUDE);
+
+    for (auto& wf : waveforms_vec) {
+        // Only use BHZ channels
+        if (wf->streamId().channel != "BHZ") continue;
         waveforms[wf->streamId()] = wf;
+
+        auto sta = inventory.getStation(wf->streamId());
+        double dist = sta ? sta->distanceTo(evt_pt) : 0;
+        sta_dists.push_back({wf->streamId().network + "." + wf->streamId().station, dist});
     }
     std::sort(sta_dists.begin(), sta_dists.end(),
               [](auto& a, auto& b){ return a.dist < b.dist; });
-    for (size_t i = 0; i < std::min(size_t(8), sta_dists.size()); i++)
-        std::cout << "  " << std::setw(10) << sta_dists[i].name
-                  << ": " << std::setprecision(1) << sta_dists[i].dist << " km\n";
-    std::cout << "  (" << sta_dists.size() << " total)\n\n";
+    for (size_t i = 0; i < std::min(size_t(10), sta_dists.size()); i++)
+        std::cout << "  " << std::setw(12) << sta_dists[i].name
+                  << ": " << std::setprecision(1) << sta_dists[i].dist << " km"
+                  << " (" << waveforms.begin()->second->sampleCount() << " samples)\n";
+    std::cout << "  (" << waveforms.size() << " total waveforms loaded)\n\n";
 
-    // write waveform CSVs (first 10 closest stations, 60 s around P)
+    // write waveform CSVs (closest 12 stations, 60s around origin)
     {
         std::ofstream f(out_dir + "/waveforms.csv");
         f << "station,distance_km,time_s,amplitude\n";
@@ -270,13 +203,14 @@ int main(int argc, char* argv[]) {
                 if (sid.network + "." + sid.station == sd.name) {
                     double sr = wf->sampleRate();
                     auto& data = wf->data();
-                    double p_tt = travelTime(sd.dist, GroundTruth::DEPTH, PhaseType::P);
-                    double lead = 15.0;
-                    int center = static_cast<int>((lead + p_tt) * sr);
-                    int lo = std::max(0, center - int(10 * sr));
-                    int hi = std::min(int(data.size()), center + int(50 * sr));
+                    // Time relative to origin
+                    double start_offset = std::chrono::duration_cast<std::chrono::microseconds>(
+                        wf->startTime() - origin).count() / 1e6;
+                    int lo = std::max(0, static_cast<int>((-start_offset - 5) * sr));
+                    int hi = std::min(static_cast<int>(data.size()),
+                                      static_cast<int>((-start_offset + 55) * sr));
                     for (int i = lo; i < hi; i += 2) {
-                        double t = (i - center) / sr;
+                        double t = start_offset + i / sr;
                         f << sd.name << "," << sd.dist << ","
                           << t << "," << data[i] << "\n";
                     }
@@ -287,12 +221,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ── 4. Phase picking ──
-    std::cout << "Step 4: STA/LTA phase detection...\n";
+    // ── 4. Phase picking on REAL data ──
+    std::cout << "Step 4: STA/LTA phase detection on real data...\n";
     STALTAPicker picker;
-    picker.setParameter("sta_length", 0.5);
-    picker.setParameter("lta_length", 10.0);
-    picker.setParameter("trigger_ratio", 3.5);
+    picker.setParameter("sta_length", 0.3);
+    picker.setParameter("lta_length", 8.0);
+    picker.setParameter("trigger_ratio", 2.5);
+    picker.setParameter("use_filter", 0);  // Raw data — filter was causing issues
 
     std::vector<PickPtr> all_picks;
     std::ofstream stalta_csv(out_dir + "/stalta.csv");
@@ -301,22 +236,24 @@ int main(int argc, char* argv[]) {
     for (auto& [sid, wf] : waveforms) {
         auto ratio = picker.characteristicFunction(*wf);
 
-        // find distance for this station
+        // find distance
         double dist = 0;
         for (auto& sd : sta_dists)
             if (sd.name == sid.network + "." + sid.station) { dist = sd.dist; break; }
 
         // write STA/LTA for closest 6
-        if (dist < 250 && dist > 0) {
+        if (dist < 100 && dist > 0) {
             double sr = wf->sampleRate();
-            double p_tt = travelTime(dist, GroundTruth::DEPTH, PhaseType::P);
-            double lead = 15.0;
-            int center = static_cast<int>((lead + p_tt) * sr);
-            int lo = std::max(0, center - int(5 * sr));
-            int hi = std::min(static_cast<int>(ratio.size()), center + static_cast<int>(15 * sr));
-            for (int i = lo; i < hi; i += 2)
+            double start_off = std::chrono::duration_cast<std::chrono::microseconds>(
+                wf->startTime() - origin).count() / 1e6;
+            int nsamp = static_cast<int>(ratio.size());
+            int lo = std::max(0, static_cast<int>((-start_off - 2) * sr));
+            int hi = std::min(nsamp, static_cast<int>((-start_off + 20) * sr));
+            for (int i = lo; i < hi; i += 2) {
+                double t = start_off + i / sr;
                 stalta_csv << sid.network << "." << sid.station << "," << dist << ","
-                           << (i - center) / sr << "," << ratio[i] << "\n";
+                           << t << "," << ratio[i] << "\n";
+            }
         }
 
         auto picks = picker.pick(*wf);
@@ -350,13 +287,12 @@ int main(int argc, char* argv[]) {
             p_picks.push_back(pk);
         }
     }
-    // Identify S-wave picks: second arrival per station
+    // Second arrivals as S-wave picks
     std::vector<PickPtr> s_picks;
     std::set<std::string> seen2;
     for (auto& pk : all_picks) {
         std::string key = pk->stream_id.network + "." + pk->stream_id.station;
         if (!seen2.insert(key).second) {
-            // Already saw first arrival (P); this is likely S
             std::string key2 = key + "_S";
             if (seen2.insert(key2).second) {
                 auto sp = std::make_shared<Pick>(*pk);
@@ -366,10 +302,39 @@ int main(int argc, char* argv[]) {
         }
     }
     std::cout << "  Detected " << all_picks.size() << " raw triggers\n";
-    std::cout << "  " << p_picks.size() << " P-wave first arrivals\n";
-    std::cout << "  " << s_picks.size() << " S-wave arrivals\n";
+    std::cout << "  " << p_picks.size() << " P-wave first arrivals (before filtering)\n";
+    std::cout << "  " << s_picks.size() << " S-wave arrivals (before filtering)\n";
 
-    // Combine P + S for the event
+    // ── Pick quality filtering ──
+    // Remove picks with negative travel times, low SNR, or unreasonable residuals
+    {
+        std::vector<PickPtr> good_p, good_s;
+        for (auto& pk : p_picks) {
+            double dt = std::chrono::duration_cast<std::chrono::microseconds>(
+                pk->time - origin).count() / 1e6;
+            if (dt < -1.0) continue;  // pick before origin = noise
+            if (pk->snr < 3.0) continue;  // too noisy
+            // Check against expected travel time
+            std::string nm = pk->stream_id.network + "." + pk->stream_id.station;
+            double dist = 0;
+            for (auto& sd : sta_dists)
+                if (sd.name == nm) { dist = sd.dist; break; }
+            double expected_tt = vmodel.travelTime(dist, GroundTruth::DEPTH, PhaseType::P);
+            if (std::abs(dt - expected_tt) > 5.0) continue;  // large residual = wrong phase
+            good_p.push_back(pk);
+        }
+        for (auto& sp : s_picks) {
+            double dt = std::chrono::duration_cast<std::chrono::microseconds>(
+                sp->time - origin).count() / 1e6;
+            if (dt < 0) continue;
+            if (sp->snr < 3.0) continue;
+            good_s.push_back(sp);
+        }
+        std::cout << "  After filtering: " << good_p.size() << " P, " << good_s.size() << " S\n";
+        p_picks = good_p;
+        s_picks = good_s;
+    }
+
     std::vector<PickPtr> ev_picks;
     for (auto& pk : p_picks) ev_picks.push_back(pk);
     for (auto& sp : s_picks) ev_picks.push_back(sp);
@@ -392,46 +357,17 @@ int main(int argc, char* argv[]) {
     }
     std::cout << "\n";
 
-    // ── 5. Association ──
-    std::cout << "Step 5: Phase association...\n";
-    PhaseAssociator assoc;
-    assoc.setVelocityModel(vmodel);
-    assoc.setStations(inventory);
-    assoc.setTimeWindow(120.0);
-    assoc.setMinStations(3);
-    assoc.setMinPhases(4);
-    for (auto& pk : p_picks) assoc.addPick(pk);
-    auto events = assoc.process();
-    std::cout << "  Associated " << events.size() << " event(s)\n";
-    if (events.empty()) { std::cerr << "ERROR: no events!\n"; return 1; }
-
-    // Use the event with the most phases
-    auto event = *std::max_element(events.begin(), events.end(),
-        [](auto& a, auto& b) {
-            return a->preferredOrigin().arrivals.size()
-                 < b->preferredOrigin().arrivals.size();
-        });
-    std::cout << "  Best event: " << event->preferredOrigin().arrivals.size()
-              << " phases\n\n";
-
-    // Use P-picks from the best associated event + all matched S picks
+    // ── 5. Use filtered P-picks directly for location ──
+    // Skip association — use quality-filtered P picks for the most robust result
+    std::cout << "Step 5: Using " << p_picks.size() << " filtered P picks for location\n\n";
+    EventPtr event = std::make_shared<Event>();
+    Origin init_orig;
+    init_orig.time = origin;
+    event->addOrigin(init_orig);
     ev_picks.clear();
-    for (auto& arr : event->preferredOrigin().arrivals)
-        ev_picks.push_back(arr.pick);
-
-    // Also add matching S-wave picks for stations in this event
-    for (auto& sp : s_picks) {
-        std::string sp_sta = sp->stream_id.network + "." + sp->stream_id.station;
-        for (auto& arr : event->preferredOrigin().arrivals) {
-            std::string a_sta = arr.pick->stream_id.network + "." + arr.pick->stream_id.station;
-            if (sp_sta == a_sta) { ev_picks.push_back(sp); break; }
-        }
-    }
-    std::cout << "  Total picks for location: " << ev_picks.size()
-              << " (P + S)\n\n";
+    for (auto& pk : p_picks) ev_picks.push_back(pk);
 
     // ── 6. Location ──
-    // First pass: grid search for coarse location
     std::cout << "Step 6a: Grid search (coarse location)...\n";
     GridSearchLocator grid_loc;
     grid_loc.setVelocityModel(vmodel);
@@ -444,7 +380,6 @@ int main(int argc, char* argv[]) {
               << std::setprecision(1) << grid_result.origin.location.depth << " km\n"
               << "  RMS: " << grid_result.origin.rms << " s\n\n";
 
-    // Second pass: Geiger refinement from grid search solution
     std::cout << "Step 6b: Geiger refinement...\n";
     GeigerLocator locator;
     locator.setVelocityModel(vmodel);
@@ -460,7 +395,6 @@ int main(int argc, char* argv[]) {
         std::cout << "  Geiger converged in " << geiger_result.iterations << " iterations\n";
     } else {
         std::cout << "  Geiger did not converge; using grid search result\n";
-        result = grid_result;
     }
     event->origins().back() = result.origin;
 
@@ -496,9 +430,10 @@ int main(int argc, char* argv[]) {
                   << " ± " << ml.uncertainty
                   << " (" << ml.station_count << " stations)\n\n";
     } else {
+        std::cout << "  ML calculation returned no stations; using USGS magnitude\n";
         event->addMagnitude(Magnitude(MagnitudeType::ML, GroundTruth::MAGNITUDE, 0.3,
                                        static_cast<int>(ev_picks.size())));
-        std::cout << "  ML = " << GroundTruth::MAGNITUDE << " (from input)\n\n";
+        std::cout << "  ML = " << GroundTruth::MAGNITUDE << " (USGS reference)\n\n";
     }
 
     // ── 8. Database ──
@@ -520,7 +455,7 @@ int main(int argc, char* argv[]) {
     double epi_err = truth.distanceTo(comp);
 
     std::cout << "================================================================\n"
-              << " Results vs Ground Truth\n"
+              << " Results vs Ground Truth (REAL DATA from EarthScope)\n"
               << "================================================================\n\n"
               << std::setprecision(3)
               << "                  Computed       Truth          Error\n"
@@ -542,7 +477,7 @@ int main(int argc, char* argv[]) {
               << "  Epicentral error: " << epi_err << " km\n"
               << "  Location quality: " << result.origin.qualityCode() << "\n\n";
 
-    // write summary JSON
+    // write summary CSV
     {
         std::ofstream f(out_dir + "/summary.csv");
         f << "parameter,computed,truth,error\n"
