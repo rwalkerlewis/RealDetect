@@ -1,10 +1,10 @@
 config,latitude,longitude,depth_km,rms_s,error_km,num_picks,magnitude
-STA/LTA + Korea + Grid,0,0,0,0,-1,1,0
-STA/LTA + Korea + Grid+Geiger,0,0,0,0,-1,1,0
-STA/LTA+AIC + Korea + Grid+Gei,0,0,0,0,-1,1,0
-STA/LTA + IASP91 + Grid+Geiger,0,0,0,0,-1,1,0
-STA/LTA + AK135 + Grid+Geiger,0,0,0,0,-1,1,0
-STA/LTA+Pol + Korea + Grid+Gei,0,0,0,0,-1,0,0
-STA/LTA+Pol + IASP91 + Grid+Gei,0,0,0,0,-1,0,0
-STA/LTA + Korea + OctTree,0,0,0,0,-1,1,0
+ObsPy picker + Korea + Grid,41.2693,128.873,3.75,4.5211,15.923,14,-1
+ObsPy picker + Korea + Grd+Geiger,41.2693,128.873,3.75,4.5211,15.923,14,-1
+ObsPy picker + IASP91 + Grd+Gei,41.2592,128.906,15,4.19858,14.3231,14,-1
+ObsPy picker + AK135 + Grd+Gei,41.2793,128.872,7.5,4.4021,15.4396,14,-1
+STA/LTA(C++) + Korea + Grid,0,0,0,0,-1,1,0
+STA/LTA(C++) + Korea + Grd+Geiger,0,0,0,0,-1,1,0
+STA/LTA+Pol + Korea + Grd+Geiger,0,0,0,0,-1,1,0
+ObsPy picker + Korea + OctTree,41.2693,128.873,3.75,4.5211,15.923,14,-1
 USGS_Truth,41.343,129.036,0.5,0,0,0,6.3

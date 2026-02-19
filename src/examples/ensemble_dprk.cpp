@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <vector>
 #include <map>
@@ -42,6 +43,7 @@ struct PipelineConfig {
     double filter_low, filter_high;
     bool aic_refine;
     bool use_polarization;
+    bool use_python_picks;      // Load picks from ObsPy picker
     std::string model_name;
     std::string locator_name;
     double residual_threshold;
@@ -74,7 +76,8 @@ static PipelineResult runPipeline(
     const StationInventory& inventory,
     const std::map<StreamID, WaveformPtr>& waveforms,
     TimePoint origin,
-    const std::vector<std::pair<std::string, double>>& sta_dists)
+    const std::vector<std::pair<std::string, double>>& sta_dists,
+    const std::string& data_dir = "data/dprk")
 {
     PipelineResult res{};
     auto vmodel = getModel(cfg.model_name);
@@ -91,7 +94,40 @@ static PipelineResult runPipeline(
 
     std::vector<PickPtr> all_picks;
 
-    if (cfg.use_polarization) {
+    if (cfg.use_python_picks) {
+        // Load picks from ObsPy multi-method picker
+        std::string pypicks_file = data_dir + "/picks_python.csv";
+        std::ifstream pyf(pypicks_file);
+        if (pyf.is_open()) {
+            std::string hdr; std::getline(pyf, hdr);
+            std::string line;
+            while (std::getline(pyf, line)) {
+                if (line.empty()) continue;
+                std::istringstream iss(line);
+                std::string sta_name, phase_str, method;
+                double tt, snr, dist; int qual; char c;
+                std::getline(iss, sta_name, ',');
+                std::getline(iss, phase_str, ',');
+                iss >> tt >> c >> snr >> c >> qual >> c >> dist >> c;
+                std::getline(iss, method);
+                StreamID sid;
+                size_t dot = sta_name.find('.');
+                if (dot != std::string::npos) {
+                    sid.network = sta_name.substr(0, dot);
+                    sid.station = sta_name.substr(dot + 1);
+                    sid.channel = "BHZ";
+                }
+                auto p = std::make_shared<Pick>();
+                p->stream_id = sid;
+                p->time = origin + std::chrono::microseconds(static_cast<int64_t>(tt * 1e6));
+                p->phase_type = PhaseType::P;
+                p->snr = snr;
+                p->is_automatic = true;
+                p->quality = snr >= 5 ? PickQuality::Impulsive : PickQuality::Emergent;
+                all_picks.push_back(p);
+            }
+        }
+    } else if (cfg.use_polarization) {
         PolarizationPicker pol;
         pol.setParameter("sta_length", cfg.sta);
         pol.setParameter("lta_length", cfg.lta);
@@ -267,22 +303,22 @@ int main(int argc, char* argv[]) {
     std::cout << "Loaded " << waveforms.size() << " waveforms, "
               << inventory.size() << " stations\n\n";
 
-    //                                           sta  lta   trig filt  flo  fhi  aic   pol    model    locator       resid
+    //                                             sta  lta  trig  filt flo  fhi  aic  pol   pyp    model    locator     resid
     std::vector<PipelineConfig> configs = {
-        {"STA/LTA + Korea + Grid",           1.0, 15.0, 3.5, false, 0, 0, false, false, "korea",  "grid",        40.0},
-        {"STA/LTA + Korea + Grid+Geiger",    1.0, 15.0, 3.5, false, 0, 0, false, false, "korea",  "grid+geiger", 40.0},
-        {"STA/LTA+AIC + Korea + Grid+Gei",   1.0, 15.0, 3.5, false, 0, 0, true,  false, "korea",  "grid+geiger", 40.0},
-        {"STA/LTA + IASP91 + Grid+Geiger",   1.0, 15.0, 3.5, false, 0, 0, false, false, "iasp91", "grid+geiger", 40.0},
-        {"STA/LTA + AK135 + Grid+Geiger",    1.0, 15.0, 3.5, false, 0, 0, false, false, "ak135",  "grid+geiger", 40.0},
-        {"STA/LTA+Pol + Korea + Grid+Gei",   1.0, 15.0, 1.5, true,  0.5, 8.0, false, true, "korea",  "grid+geiger", 40.0},
-        {"STA/LTA+Pol + IASP91 + Grid+Gei",  1.0, 15.0, 1.5, true,  0.5, 8.0, false, true, "iasp91", "grid+geiger", 40.0},
-        {"STA/LTA + Korea + OctTree",         1.0, 15.0, 3.5, false, 0, 0, false, false, "korea",  "octtree",     40.0},
+        {"ObsPy picker + Korea + Grid",       1, 15, 3.5, 0, 0, 0, 0, 0, true,  "korea",  "grid",        40},
+        {"ObsPy picker + Korea + Grd+Geiger", 1, 15, 3.5, 0, 0, 0, 0, 0, true,  "korea",  "grid+geiger", 40},
+        {"ObsPy picker + IASP91 + Grd+Gei",   1, 15, 3.5, 0, 0, 0, 0, 0, true,  "iasp91", "grid+geiger", 40},
+        {"ObsPy picker + AK135 + Grd+Gei",    1, 15, 3.5, 0, 0, 0, 0, 0, true,  "ak135",  "grid+geiger", 40},
+        {"STA/LTA(C++) + Korea + Grid",        1, 15, 3.5, 0, 0, 0, 0, 0, false, "korea",  "grid",        40},
+        {"STA/LTA(C++) + Korea + Grd+Geiger",  1, 15, 3.5, 0, 0, 0, 0, 0, false, "korea",  "grid+geiger", 40},
+        {"STA/LTA+Pol + Korea + Grd+Geiger",   1, 15, 1.5, 0, .5, 8, 0, 1, false, "korea",  "grid+geiger", 40},
+        {"ObsPy picker + Korea + OctTree",     1, 15, 3.5, 0, 0, 0, 0, 0, true,  "korea",  "octtree",     40},
     };
 
     std::vector<PipelineResult> results;
     for (auto& cfg : configs) {
         std::cout << "Running: " << cfg.name << "..." << std::flush;
-        auto res = runPipeline(cfg, inventory, waveforms, origin, sta_dists);
+        auto res = runPipeline(cfg, inventory, waveforms, origin, sta_dists, data_dir);
         results.push_back(res);
         if (res.error_km >= 0) {
             std::cout << " error=" << std::fixed << std::setprecision(1)
