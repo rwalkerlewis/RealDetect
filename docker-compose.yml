@@ -1,24 +1,57 @@
 version: "3.8"
 
+# ── Shared build environment ──────────────────────────────────────────────────
+x-dev-base: &dev-base
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  volumes:
+    - .:/app/src_mount:cached
+    - ccache:/ccache
+  environment:
+    - CCACHE_DIR=/ccache
+
 services:
   # ── Development environment ───────────────────────────────────────
   # Mounts source code, rebuilds on start, serves the web GUI.
   # Usage:  docker compose up dev
   dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    <<: *dev-base
     ports:
       - "8080:8080"
     volumes:
       - .:/app/src_mount:cached
-      - build-cache:/app/build
+      - build-cache-debug:/app/build
       - data:/app/data
+      - ccache:/ccache
     environment:
+      - CCACHE_DIR=/ccache
       - REALDETECT_STATIONS=/app/src_mount/config/stations.txt
       - REALDETECT_CONFIG=/app/src_mount/config/realdetect.conf
       - REALDETECT_DB=/app/data/realdetect_catalog.db
       - REALDETECT_BUILD_DIR=/app/build
+      - BUILD_TYPE=Debug
+    stdin_open: true
+    tty: true
+
+  # ── Interactive shell ─────────────────────────────────────────────
+  # Drop into a pre-built dev container for manual exploration.
+  # Usage:  docker compose run --rm shell
+  shell:
+    <<: *dev-base
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache-debug:/app/build
+      - data:/app/data
+      - ccache:/ccache
+    environment:
+      - CCACHE_DIR=/ccache
+      - REALDETECT_STATIONS=/app/src_mount/config/stations.txt
+      - REALDETECT_CONFIG=/app/src_mount/config/realdetect.conf
+      - REALDETECT_DB=/app/data/realdetect_catalog.db
+      - REALDETECT_BUILD_DIR=/app/build
+      - BUILD_TYPE=Debug
+    entrypoint: /bin/bash
     stdin_open: true
     tty: true
 
@@ -38,24 +71,99 @@ services:
       - REALDETECT_CONFIG=/app/config/realdetect.conf
       - REALDETECT_DB=/app/data/realdetect_catalog.db
 
-  # ── Run tests only ────────────────────────────────────────────────
+  # ── Run full test suite (Debug) ───────────────────────────────────
   # Usage:  docker compose run --rm test
   test:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    <<: *dev-base
     volumes:
       - .:/app/src_mount:cached
-      - build-cache:/app/build
-    entrypoint: /bin/bash
-    command: >
-      -c "
-        mkdir -p /app/build && cd /app/build &&
-        cmake /app/src_mount -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON &&
-        make -j$$(nproc) &&
-        ./realdetect_tests
-      "
+      - build-cache-debug:/app/build
+      - ccache:/ccache
+    environment:
+      - CCACHE_DIR=/ccache
+      - BUILD_TYPE=Debug
+      - RUN_MODE=test
+    entrypoint: /app/entrypoint-dev.sh
+
+  # ── AddressSanitizer test run ─────────────────────────────────────
+  # Detects memory errors (heap/stack overflow, use-after-free, leaks).
+  # Usage:  docker compose run --rm test-asan
+  test-asan:
+    <<: *dev-base
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache-asan:/app/build
+      - ccache:/ccache
+    environment:
+      - CCACHE_DIR=/ccache
+      - BUILD_TYPE=Debug
+      - SANITIZER=asan
+      - RUN_MODE=test
+      - ASAN_OPTIONS=detect_leaks=1:halt_on_error=0:print_stats=1
+    entrypoint: /app/entrypoint-dev.sh
+    # ASan requires ptrace-style access for some checks
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+  # ── UndefinedBehaviorSanitizer test run ──────────────────────────
+  # Detects undefined behavior (integer overflow, null deref, etc.).
+  # Usage:  docker compose run --rm test-ubsan
+  test-ubsan:
+    <<: *dev-base
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache-ubsan:/app/build
+      - ccache:/ccache
+    environment:
+      - CCACHE_DIR=/ccache
+      - BUILD_TYPE=Debug
+      - SANITIZER=ubsan
+      - RUN_MODE=test
+      - UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=0
+    entrypoint: /app/entrypoint-dev.sh
+
+  # ── ThreadSanitizer test run ──────────────────────────────────────
+  # Detects data races in multi-threaded code.
+  # Usage:  docker compose run --rm test-tsan
+  test-tsan:
+    <<: *dev-base
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache-tsan:/app/build
+      - ccache:/ccache
+    environment:
+      - CCACHE_DIR=/ccache
+      - BUILD_TYPE=Debug
+      - SANITIZER=tsan
+      - RUN_MODE=test
+      - TSAN_OPTIONS=halt_on_error=0:print_suppressions=0
+    entrypoint: /app/entrypoint-dev.sh
+
+  # ── Run examples ──────────────────────────────────────────────────
+  # Runs the ridgecrest_example or dprk_example binaries against real data.
+  # Set EXAMPLE env var: ridgecrest | dprk | ensemble_ridgecrest | ensemble_dprk
+  # Usage:  EXAMPLE=ridgecrest docker compose run --rm examples
+  examples:
+    <<: *dev-base
+    volumes:
+      - .:/app/src_mount:cached
+      - build-cache-debug:/app/build
+      - ./data:/app/data:cached
+      - ./output:/app/output
+      - ccache:/ccache
+    environment:
+      - CCACHE_DIR=/ccache
+      - BUILD_TYPE=Release
+      - RUN_MODE=examples
+      - EXAMPLE=${EXAMPLE:-ridgecrest}
+    entrypoint: /app/entrypoint-dev.sh
 
 volumes:
-  build-cache:
+  build-cache-debug:
+  build-cache-asan:
+  build-cache-ubsan:
+  build-cache-tsan:
+  ccache:
   data:

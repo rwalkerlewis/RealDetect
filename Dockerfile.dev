@@ -1,36 +1,64 @@
-# Development Dockerfile - mounts source code, supports live rebuilds
+# Development Dockerfile - mounts source code, supports live rebuilds and sanitizer runs
+# Supports linux/amd64 and linux/arm64 via Docker buildx
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# ── System packages ───────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
+    # Build toolchain
     build-essential \
     cmake \
+    ninja-build \
+    ccache \
+    # Clang toolchain (for cross-compilation, sanitizers, and IDE support)
+    clang \
+    clang-format \
+    clang-tidy \
+    clangd \
+    lldb \
+    # GCC extras for sanitizers
     gdb \
     valgrind \
+    # Libraries
     libeigen3-dev \
     libsqlite3-dev \
     libgomp1 \
     pkg-config \
+    # Python runtime + GUI deps
     python3 \
     python3-pip \
+    # Developer utilities
     git \
     curl \
+    wget \
     vim \
+    nano \
+    htop \
+    less \
+    jq \
+    # Cross-compilation helpers
+    file \
     && rm -rf /var/lib/apt/lists/*
 
+# ── Python packages ───────────────────────────────────────────────────────────
 RUN pip3 install --no-cache-dir \
     fastapi \
-    uvicorn[standard] \
+    "uvicorn[standard]" \
     aiosqlite \
     jinja2 \
     watchfiles
+
+# ── ccache config ─────────────────────────────────────────────────────────────
+ENV CCACHE_DIR=/ccache
+ENV PATH="/usr/lib/ccache:${PATH}"
 
 WORKDIR /app
 
 COPY docker/entrypoint-dev.sh /app/entrypoint-dev.sh
 RUN chmod +x /app/entrypoint-dev.sh
 
+# Build output on PATH; ccache volume is declared in docker-compose
 ENV PATH="/app/build:${PATH}"
 
 EXPOSE 8080

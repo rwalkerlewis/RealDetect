@@ -1,0 +1,91 @@
+{
+  "name": "RealDetect Dev",
+
+  // ── Use the same image as docker-compose `dev` service ────────────────────
+  "build": {
+    "context": "..",
+    "dockerfile": "../Dockerfile.dev"
+  },
+
+  // ── Forward the web GUI port ───────────────────────────────────────────────
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "RealDetect Web GUI",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  // ── Mount the workspace into the container ────────────────────────────────
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app/src_mount,type=bind,consistency=cached",
+  "workspaceFolder": "/app/src_mount",
+
+  // ── Named volumes shared with docker-compose ──────────────────────────────
+  "mounts": [
+    "source=realdetect-build-debug,target=/app/build,type=volume",
+    "source=realdetect-ccache,target=/ccache,type=volume",
+    "source=realdetect-data,target=/app/data,type=volume"
+  ],
+
+  // ── Environment variables ─────────────────────────────────────────────────
+  "containerEnv": {
+    "BUILD_TYPE": "Debug",
+    "SANITIZER": "",
+    "RUN_MODE": "dev",
+    "CCACHE_DIR": "/ccache",
+    "REALDETECT_STATIONS": "/app/src_mount/config/stations.txt",
+    "REALDETECT_CONFIG": "/app/src_mount/config/realdetect.conf",
+    "REALDETECT_DB": "/app/data/realdetect_catalog.db",
+    "REALDETECT_BUILD_DIR": "/app/build"
+  },
+
+  // ── Run a first-time build so the IDE has compile_commands.json ───────────
+  "postStartCommand": "mkdir -p /app/build && cd /app/build && cmake /app/src_mount -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && ninja -j$(nproc) && ln -sf /app/build/compile_commands.json /app/src_mount/compile_commands.json",
+
+  // ── VS Code settings inside the container ─────────────────────────────────
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "cmake.buildDirectory": "/app/build",
+        "cmake.generator": "Ninja",
+        "cmake.buildType": "Debug",
+        "cmake.configureArgs": ["-DBUILD_TESTS=ON", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"],
+        "C_Cpp.default.compileCommands": "/app/build/compile_commands.json",
+        "C_Cpp.default.includePath": [
+          "/app/src_mount/include",
+          "/app/src_mount/include/eigen3",
+          "/usr/include/eigen3"
+        ],
+        "clangd.arguments": [
+          "--compile-commands-dir=/app/build",
+          "--background-index",
+          "--clang-tidy",
+          "--header-insertion=never"
+        ],
+        "editor.formatOnSave": true,
+        "[cpp]": {
+          "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+        },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        // C/C++ tooling
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "vadimcn.vscode-lldb",
+        // Git
+        "eamodio.gitlens",
+        // Docker
+        "ms-azuretools.vscode-docker",
+        // Utilities
+        "streetsidesoftware.code-spell-checker",
+        "ms-vscode.hexeditor"
+      ]
+    }
+  },
+
+  // ── Allow ptrace for debuggers / ASan ─────────────────────────────────────
+  "capAdd": ["SYS_PTRACE"],
+  "securityOpt": ["seccomp=unconfined"]
+}
